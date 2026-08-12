@@ -10,3 +10,6 @@ result_prediction.png ... resulting graph
 
 usage:
 python3 LUMI-IQ_Use_case-QML_time_series_forecasting.py
+
+required packages:
+numpy, matplotlib, qiskit_machine_learning
