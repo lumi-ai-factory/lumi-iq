@@ -1,4 +1,4 @@
-Use case showing the possible use of QNN for predicting the development of a time series, in this case electricity prices.
+Use case showing the possible use of QNN (Quantum Neural Network) for predicting the development of a time series, in this case electricity prices.
 The Python script loads historical data and the trained QNN model. It then predicts the electricity price 1 hour ahead and saves the results to a png file.
 The resulting graph shows the real data (red), the training set (blue points), and the prediction (green).
 
