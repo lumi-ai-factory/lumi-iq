@@ -110,3 +110,7 @@ file if you want the results to reflect it instead of the reconstruction.
   implements QAOA manually (via `QAOAAnsatz` + `scipy.optimize`) to avoid a
   known version incompatibility between `qiskit_algorithms` 0.4.0 and
   `qiskit` 1.2.x.
+
+---
+
+**Author:** Dr. Van Binh Henri VU — Quantum Researcher, IT4Innovations (IT4I), VSB – Technical University of Ostrava

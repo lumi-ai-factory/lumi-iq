@@ -210,3 +210,8 @@ python build_dataset.py
 Reads `Abilene.gml` from the same directory, writes
 `abilene_subgraph_dataset.json`. Deterministic given the fixed seed — running
 it again produces an identical file, which is the point.
+
+
+---
+
+**Author:** Dr. Van Binh Henri VU — Quantum Researcher, IT4Innovations (IT4I), VSB – Technical University of Ostrava
