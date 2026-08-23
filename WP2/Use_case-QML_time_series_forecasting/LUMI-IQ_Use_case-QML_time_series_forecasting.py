@@ -1,3 +1,8 @@
+
+###############################
+## Use case by Jiri Tomcala
+###############################
+
 import matplotlib.pyplot as plt
 import numpy as np
 from qiskit_machine_learning.algorithms.regressors import NeuralNetworkRegressor
@@ -37,4 +42,3 @@ plt.plot(range(len(outputs_predicted_orig)), outputs_predicted_orig, "g-")
 plt.legend(['real values', 'training set points', 'prediction'])
 plt.grid()
 plt.savefig("result_prediction.png", dpi=150)
-#plt.show()
