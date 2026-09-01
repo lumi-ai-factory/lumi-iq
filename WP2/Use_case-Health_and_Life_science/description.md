@@ -1,0 +1,16 @@
+# Health and life sciences use case
+
+Health and life sciences encompass a wide range of topics including biochemistry, genetics, and pharmacology. Many of the topics rely on the understanding of molecules, and how they interact. One significant area of interest in the topic of health and life sciences is drug discovery and development.
+
+Currently drug discovery and development can take decades and cost a significant amount of money before a single new drug can enter the market. Classical computation methods are widely used to accelerate the discovery process, and these classical methods used to aid drug discovery have improved significantly over time. Additionally, machine learning and deep learning have further contributed to the speed and accuracy of the evaluation of candidate molecules. [1,2] However, the sheer size of the chemical compounds that are studies as potential candidates for new drugs cause limitations on the usability to these classical methods. [2]
+
+The molecular interactions that are crucial to understand for drug discovery and research are fundamentally quantum mechanical. Hence, quantum computers offer a unique possibility of representing molecules in their fundamental form. [1,2] Quantum computers do not necessarily need to be used in all aspects of computations related to drug discovery, and hence replace classical computers completely. Instead, quantum computers can be used as accelerators for certain computationally heavy tasks. [1] Hence, the full workflows would be hybrid workflows where both classical and quantum computing is needed.
+
+This use case is based on the article *End-to-End Quantum Simulation of a Chemical System* by van Dam et al. (2024). This use case presents a hybrid quantum-classical workflow to solve the electronic structure of active space of a molecule. The use case uses classical computing resources to perform a Hartree-Fock calculation, identify strongly correlated orbitals using AVAS, and construct the active space Hamiltonian using CASSF. After that the variational quantum eigensolver (VQE) quantum algorithm is used to find the ground state of the active space. After the ground state energy and the parameters that define the ground state of the active space are found, the classical shadow protocol is used. The protocol creates a classical shadow of a quantum state $\rho$ that can be used to estimate properties of the quantum state.
+
+The workflow is demonstrated using the $H_2$ molecule. However, the workflow is designed so that it can be used for molecules that are larger or more complex. For these larger or more complex systems, quantum computers are expected to offer computational advantage over classical computers.
+
+## References
+[1] Jing Li, Leyi Wei, Henry H Y Tong, Quan Zou, Quantum computing applications in drug discovery, Briefings in Bioinformatics, Volume 27, Issue 3, May 2026, bbag274, https://doi.org/10.1093/bib/bbag274
+[2] Zhou, Y., Chen, J., Cheng, J. et al. Quantum-machine-assisted drug discovery. npj Drug Discov. 3, 1 (2026). https://doi.org/10.1038/s44386-025-00033-2
+[3] van Dam W, Liu H, Low GH, Paetznick A, Paz A, Silva M, Sundaram A, Svore K & Troyer M. End-to-End Quantum Simulation of a Chemical System. arXiv preprint arXiv:2409.05835 (2024). https://arxiv.org/abs/2409.05835
