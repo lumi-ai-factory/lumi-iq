@@ -16,3 +16,8 @@ python3 LUMI-IQ_Use_case-QML_time_series_forecasting.py
 
 required packages:
 numpy, matplotlib, qiskit_machine_learning
+
+Required packages with the versions:
+numpy, matplotlib, dill
+qiskit>=2.2,<2.5
+qiskit-machine-learning==0.9.1
