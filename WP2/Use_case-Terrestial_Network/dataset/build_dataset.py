@@ -24,6 +24,9 @@ import networkx as nx
 
 RNG_SEED = 42  # fixed seed -> reproducible dataset, required for any real experiment log
 
+# Resolve data files next to this script, so it runs from any working directory.
+HERE = Path(__file__).resolve().parent
+
 
 # ---------------------------------------------------------------------------
 # Stage 1: parse
@@ -291,7 +294,7 @@ def serialize(g: nx.Graph, demand: dict, out_path: str, meta: dict):
 def main():
     target_size = 7  # midpoint of the 6-8 range you chose
 
-    g_full = load_topology("/home/claude/routing_dataset/Abilene.gml")
+    g_full = load_topology(str(HERE / "Abilene.gml"))
     print(f"Loaded full Abilene topology: {g_full.number_of_nodes()} nodes, "
           f"{g_full.number_of_edges()} edges")
 
@@ -348,7 +351,7 @@ def main():
         "target_subgraph_size": target_size,
     }
 
-    out_path = "/home/claude/routing_dataset/abilene_subgraph_dataset.json"
+    out_path = str(HERE / "abilene_subgraph_dataset.json")
     payload = serialize(g_aug, demand, out_path, meta)
 
     print(f"\nWrote dataset to {out_path}")
