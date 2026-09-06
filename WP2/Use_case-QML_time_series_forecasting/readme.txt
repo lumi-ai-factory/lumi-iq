@@ -7,7 +7,7 @@ The resulting graph shows the real data (red), the training set (blue points), a
 
 files:
 LUMI-IQ_Use_case-QML_time_series_forecasting.py ... Python script
-data.npy ... real historical data
+data.npy ... real historical data (source: https://www.ote-cr.cz)
 QNN_0.9405658017321574-model_state.dill ... trained QNN model
 result_prediction.png ... resulting graph
 
