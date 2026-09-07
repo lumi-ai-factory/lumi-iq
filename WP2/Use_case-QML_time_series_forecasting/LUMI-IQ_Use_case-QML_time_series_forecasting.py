@@ -1,7 +1,10 @@
+import sys
 
-###############################
-## Use case by Jiri Tomcala
-###############################
+if (len(sys.argv)) < 2:
+    print("Specify the file with the saved model.")
+    sys.exit()
+    
+modelfile = sys.argv[1]
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -18,9 +21,10 @@ for i in range(n):
     inputs.append(data[i:(i+8)])
 inputs = np.array(inputs)
 
-reg = NeuralNetworkRegressor.from_dill("QNN_0.9405658017321574-model_state.dill")
+reg = NeuralNetworkRegressor.from_dill(modelfile)
 
 outputs = np.array(data[8:(8+n)])
+outputs_norm = ((outputs - min(outputs)) / (max(outputs) - min(outputs))) - 0.5
 outputs_orig = np.array(data_orig[8:(8+n)])
 outputs_train_orig = outputs_orig[0:240]
 
@@ -32,13 +36,18 @@ plt.plot(range(len(outputs_orig)), outputs_orig[range(len(outputs_orig))], "r--"
 plt.plot(range(len(outputs_train_orig)), outputs_train_orig, "b.")
 
 # plot predicted data
-outputs_predicted_norm = reg.predict(inputs)
+outputs_predicted_norm = reg.predict(inputs)[:,0]
 outputs_predicted_norm_pi = (outputs_predicted_norm + 0.5) * (max(outputs) - min(outputs)) + min(outputs)
 outputs_predicted_orig = (outputs_predicted_norm_pi + np.pi)/(2*np.pi) * (max(data_orig[0:(8+n)]) - min(data_orig[0:(8+n)])) + min(data_orig[0:(8+n)])
-plt.title("Forecasting electricity price with QNN on simulator ... Average precision = 94%   (8-qubits PQC with 80 trainable parameters θ was used)")
+
+score = reg.score(inputs, outputs_norm)
+
+plt.title(f"Forecasting electricity price with model from {modelfile} on simulator. Average precision = {score*100:.2f}% (8-qubits PQC with 80 trainable parameters θ was used)")
 plt.xlabel("Time [h]")
 plt.ylabel("Price [EUR/MWh]")
 plt.plot(range(len(outputs_predicted_orig)), outputs_predicted_orig, "g-")
 plt.legend(['real values', 'training set points', 'prediction'])
 plt.grid()
 plt.savefig("result_prediction.png", dpi=150)
+print(f"Average precision = {score*100:.2f}%")
+print("Result saved in result_prediction.png")
