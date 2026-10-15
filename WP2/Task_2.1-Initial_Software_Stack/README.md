@@ -83,6 +83,28 @@ Everything runs directly via standard Lmod environment modules:
 
 ---
 
+### Launching JupyterLab via LUMI Open OnDemand (lumi.csc.fi)
+
+To launch an interactive JupyterLab session on LUMI pre-loaded with the `lumi-iq` environment:
+
+1. Log in to [lumi.csc.fi](https://lumi.csc.fi) and navigate to **Interactive Apps** &rarr; **Jupyter**.
+2. Select your project (`project_462001789`), partition, and resource limits.
+3. Under **Settings**, select the **Advanced** tab.
+4. Set **Custom Python type** to `Script`.
+5. In **Script or path to script**, insert:
+   ```bash
+   module use $HOME/modulefiles
+   module load lumi-iq
+   ```
+6. *(Optional)* Check **Save settings** to persist this configuration across future sessions.
+7. Click **Launch**.
+
+![LUMI Open OnDemand Jupyter Settings](docs/images/lumi_ood_jupyter_settings.png)
+
+JupyterLab will launch directly with the containerized LUMI-IQ environment active, allowing you to open and run `vlq_bell_state.ipynb` immediately without needing any extra kernel setup.
+
+---
+
 ## 2. Centralized Project Configuration (`.env` or `~/.lumi-iq/config`)
 
 You can change project settings for both **LUMI** and **LEXIS** in one single place:
