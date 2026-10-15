@@ -57,9 +57,9 @@ python submit_job.py
 
 ---
 
-## 1. Environment Loading via Lmod Modules (Pure CLI / No Jupyter Kernels)
+## 1. Environment Loading via Lmod Modules (Pure CLI)
 
-No Jupyter kernels or kernel registration files are needed. Everything runs directly via standard Lmod environment modules:
+Everything runs directly via standard Lmod environment modules:
 
 1. **Load the module**:
    ```bash

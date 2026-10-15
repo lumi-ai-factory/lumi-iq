@@ -1,5 +1,4 @@
 --extra-index-url https://opencode.it4i.eu/api/v4/projects/107/packages/pypi/simple
 
-ipykernel
 matplotlib
 qaas==0.5.3
