@@ -35,9 +35,27 @@ qc.h(0)
 qc.cx(0, 1)
 qc.measure_all()
 
-# OAuth 2.0 Device Code Flow authentication
-# If LEXIS_TOKEN is not exported in environment, QProvider initiates interactive Device Code Flow
+# 1. Manage LEXIS Token (Environment variable or ~/.lumi-iq/token)
+token_dir = os.path.expanduser("~/.lumi-iq")
+token_file = os.path.join(token_dir, "token")
 token = os.getenv("LEXIS_TOKEN")
+
+# If no token in environment, check if a valid saved token exists on disk
+if not token and os.path.exists(token_file):
+    try:
+        import jwt, time
+        with open(token_file, "r") as f:
+            candidate = f.read().strip()
+        payload = jwt.decode(candidate, options={"verify_signature": False})
+        exp = payload.get("exp", 0)
+        remaining = exp - int(time.time())
+        if remaining > 60:
+            token = candidate
+            print(f"Loaded valid token from {token_file} (valid for {remaining}s / {remaining // 60}m).")
+        else:
+            print(f"Saved token in {token_file} is expired ({remaining}s remaining). Re-authenticating...")
+    except Exception as e:
+        print(f"Notice: Could not load token from {token_file}: {e}")
 
 # 2. Instantiate QProvider with your LEXIS project
 # Passing token=None triggers the interactive OAuth Device Code Flow in the browser!
@@ -49,6 +67,18 @@ provider = QProvider(
     lexis_project=lexis_project,
     token=token if token else None,
 )
+
+# 3. Securely persist token to ~/.lumi-iq/token with chmod 600
+if provider._token:
+    try:
+        os.makedirs(token_dir, mode=0o700, exist_ok=True)
+        fd = os.open(token_file, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        with open(fd, "w") as f:
+            f.write(provider._token)
+        os.chmod(token_file, 0o600)
+        print(f"Token saved securely to {token_file} (permissions: 0600).")
+    except Exception as e:
+        print(f"Notice: Could not save token: {e}")
 
 # 3. Initialize the QBackend with the client
 print(f"Retrieving backend for resource: {resource_name}...")

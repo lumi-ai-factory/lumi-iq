@@ -6,12 +6,12 @@
 
 #SBATCH --job-name=lumi-iq-vlq
 #SBATCH --account=project_465003105        # Your LUMI project ID
-#SBATCH --partition=standard               # Standard CPU partition (use 'small' or 'interactive' for quick tests, 'gpu' for GPU)
+#SBATCH --partition=small                  # 'small' partition for sub-node CPU allocation
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=16G
-#SBATCH --time=00:30:00
+#SBATCH --time=00:15:00                    # Set dynamically < token validity by submit_job.py
 #SBATCH --output=lumi_iq_%j.out
 #SBATCH --error=lumi_iq_%j.err
 
@@ -24,20 +24,26 @@ module purge
 module load LUMI/24.03
 
 # 2. Load the LUMI-IQ environment
-if module is-avail LUMI-IQ-qaas/VLQ 2>/dev/null; then
-    module load LUMI-IQ-qaas/VLQ
+if module is-avail lumi-iq 2>/dev/null; then
+    module load lumi-iq
 elif [ -d "$HOME/lumi-iq-env/bin" ]; then
     export PATH="$HOME/lumi-iq-env/bin:$PATH"
 fi
 
 # 3. Securely set LEXIS authentication token
-# For batch execution, export LEXIS_TOKEN prior to sbatch (e.g., export LEXIS_TOKEN="...")
+TOKEN_FILE="$HOME/.lumi-iq/token"
+if [ -z "${LEXIS_TOKEN:-}" ] && [ -f "$TOKEN_FILE" ]; then
+    export LEXIS_TOKEN=$(cat "$TOKEN_FILE")
+    echo "Using secure token from $TOKEN_FILE (permissions: 0600)"
+fi
+
 if [ -z "${LEXIS_TOKEN:-}" ]; then
-    echo "Warning: LEXIS_TOKEN is not set in environment. Interactive Device Flow cannot open browser in batch mode."
+    echo "ERROR: LEXIS_TOKEN is not set and $TOKEN_FILE does not exist. Run python submit_job.py to authenticate first."
+    exit 1
 fi
 
 # 4. Execute the hybrid quantum workflow on LUMI compute node
-echo "Executing quantum circuit on VLQ via QScheduler..."
+echo "Executing quantum circuit on VLQ QPU..."
 srun python -u vlq_bell_state.py
 
 echo "=== Job Completed Successfully ==="
