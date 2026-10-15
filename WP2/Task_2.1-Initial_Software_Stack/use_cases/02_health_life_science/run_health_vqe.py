@@ -23,7 +23,10 @@ sys.path.insert(0, os.path.join(script_dir, "code"))
 sys.path.insert(0, os.path.abspath(os.path.join(script_dir, "../..")))
 
 from main import run_workflow, get_backend
-from plot import E_CI
+try:
+    from plot import E_CI
+except Exception:
+    E_CI = -1.85238817356958
 import pandas as pd
 import matplotlib
 matplotlib.use("Agg")

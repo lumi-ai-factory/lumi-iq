@@ -4,7 +4,10 @@ import sys
 import warnings
 warnings.filterwarnings("ignore", message=".*IProgress not found.*")
 
-from qaas.client import QProvider, QBackend, QJob
+try:
+    from qaas.client import QProvider, QBackend, QJob
+except ImportError:
+    QProvider, QBackend, QJob = None, None, None
 
 import argparse
 import numpy as np

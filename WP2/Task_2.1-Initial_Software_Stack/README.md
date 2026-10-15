@@ -18,7 +18,8 @@ It provides an end-to-end operational pipeline connecting the **LUMI supercomput
 | **[deploy_shared_module.sh](deploy_shared_module.sh)** | Deploys container and modulefiles into the shared project space (`/project/project_462001789/`) for all users. |
 | **[auth.py](auth.py)** | Standalone utility to obtain a fresh LEXIS token via OAuth Device Flow. |
 | **[config.py](config.py)** | Centralized configuration loader for LUMI and LEXIS projects. |
-| **[submit_lumi.sbatch](submit_lumi.sbatch)** | Official Slurm batch script template for non-interactive execution on LUMI compute nodes (`project_462001789`). |
+| **[run_all_tests.sh](run_all_tests.sh)** | Master single-command test suite runner executing all stack checks, QPU connectivity, and all 4 WP2 use cases. |
+| **[run_all_tests.py](run_all_tests.py)** | Underlying Python test orchestrator supporting `--backend SIM|VLQ`, selective test filters, and structured reporting. |
 | **[use_cases/](use_cases/)** | Directory containing the 4 standardized WP2 use cases (Car Manufacturing, Health & Life Science, Terrestrial Network, QML Time Series) adapted for LUMI. |
 | **[D2.1_Deliverable_Revised_Sections.md](D2.1_Deliverable_Revised_Sections.md)** | Revision document for Deliverable D2.1 addressing all peer-review comments and LUMI policy compliance. |
 | **[.env.example](.env.example)** | Template for local environment variable configuration (no secrets). |
@@ -218,3 +219,34 @@ squeue --me
 scontrol show job <JOB_ID> | grep -E "(JobState|Deadline|TimeLimit)"
 cat lumi_iq_<JOB_ID>.out
 ```
+
+---
+
+## 5. Automated Master Test Suite (`run_all_tests.sh`)
+
+To verify the entire software stack, LEXIS / QPU connectivity, and all 4 WP2 use cases with a single automated command:
+
+```bash
+cd WP2/Task_2.1-Initial_Software_Stack
+
+# Fast local simulation mode (tests all 4 use cases + stack in ~1-2 minutes):
+bash run_all_tests.sh --backend SIM
+
+# Full hardware execution mode (dispatches circuits to IT4I VLQ 24-Qubit QPU):
+bash run_all_tests.sh --backend VLQ
+
+# Run selected use cases only (e.g. Use Case 2 & 4):
+bash run_all_tests.sh --use-cases 2,4
+
+# Run only software stack and hardware connectivity checks:
+bash run_all_tests.sh --skip-use-cases
+```
+
+The script automatically:
+1. Loads the `lumi-iq` Lmod module if running in a fresh shell.
+2. Checks all core Python packages (`qiskit`, `qiskit_aer`, `qaas`, `py4lexis`, `scipy`, `sklearn`, `pandas`, `networkx`, `matplotlib`, `dill`, `pyscf`).
+3. Verifies active LEXIS credentials (`~/.lumi-iq/token`) and QPU target (`VLQ-CZ`).
+4. Executes the core 2-qubit Bell state entanglement benchmark.
+5. Executes all 4 standardized WP2 use cases sequentially with timing and validation.
+6. Prints a formatted ASCII summary table with execution durations and status (`[ PASS ]`, `[ FAIL ]`, `[ SKIP ]`), returning exit code 0 on complete success.
+

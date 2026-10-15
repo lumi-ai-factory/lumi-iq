@@ -20,7 +20,10 @@ import warnings
 warnings.filterwarnings("ignore", message=".*IProgress not found.*")
 
 import numpy as np
-import networkx as nx
+try:
+    import networkx as nx
+except ImportError:
+    nx = None
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
