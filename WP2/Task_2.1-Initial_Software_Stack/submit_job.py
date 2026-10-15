@@ -11,8 +11,11 @@ LUMI-IQ Automated Slurm Job Submitter with Queue-Aware Lifetime Enforcement:
 5. Enforces the invariant:
    [Queue Wait Time] + [Execution Walltime] <= [Token Validity] - [Safety Margin]
    => Slurm --deadline is set to (Token Expiry - Safety Margin).
-   If the job waits too long in the queue and cannot finish before the deadline,
-   Slurm automatically drops the job rather than dispatching it with an expired token.
+6. Creates a dedicated, isolated execution directory on $SCRATCH:
+   - Slurm stdout/stderr logs are stored in the scratch directory.
+   - Circuit measurement outputs (results.json) are stored in the scratch directory.
+   - The git repository remains completely clean.
+   - Creates a local symlink 'latest_run' pointing to the scratch run folder.
 """
 
 import os
@@ -21,6 +24,7 @@ import time
 import datetime
 import argparse
 import subprocess
+import shutil
 import jwt
 
 TOKEN_DIR = os.path.expanduser("~/.lumi-iq")
@@ -143,9 +147,29 @@ def parse_time_to_seconds(time_str: str) -> int:
     raise ValueError(f"Invalid time format: {time_str}")
 
 
+def resolve_scratch_base(custom_dir: str | None = None) -> str:
+    """Resolves LUMI scratch directory for job runs."""
+    if custom_dir:
+        return os.path.abspath(custom_dir)
+    user = os.environ.get("USER", "jkonvick")
+    scratch = os.environ.get("SCRATCH")
+    if scratch and os.path.exists(scratch):
+        if user not in scratch:
+            return os.path.join(scratch, user, "lumi-iq-jobs")
+        return os.path.join(scratch, "lumi-iq-jobs")
+    for candidate in [
+        f"/scratch/project_465003105/{user}/lumi-iq-jobs",
+        f"/scratch/project_465003105/lumi-iq-jobs",
+        os.path.expanduser("~/scratch/lumi-iq-jobs"),
+    ]:
+        if os.path.exists(os.path.dirname(candidate)):
+            return candidate
+    return os.path.expanduser("~/lumi-iq-jobs")
+
+
 def main():
     parser = argparse.ArgumentParser(
-        description="LUMI-IQ Slurm Submitter with Queue-Aware Lifetime Enforcement"
+        description="LUMI-IQ Slurm Submitter with Queue-Aware Lifetime Enforcement & Scratch Execution"
     )
     parser.add_argument(
         "--walltime",
@@ -157,6 +181,11 @@ def main():
         type=int,
         default=60,
         help="Safety margin in seconds before token expiry (default: 60)",
+    )
+    parser.add_argument(
+        "--scratch-dir",
+        default=None,
+        help="Base scratch directory for job outputs (default: $SCRATCH/$USER/lumi-iq-jobs)",
     )
     args = parser.parse_args()
 
@@ -182,6 +211,25 @@ def main():
     h, m = divmod(m, 60)
     slurm_time_str = f"{h:02d}:{m:02d}:{s:02d}"
 
+    # Setup dedicated execution run directory on SCRATCH
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    scratch_base = resolve_scratch_base(args.scratch_dir)
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    run_dir = os.path.join(scratch_base, f"run_{timestamp}")
+    os.makedirs(run_dir, exist_ok=True)
+
+    # Copy script into run_dir for reproducibility and direct execution
+    shutil.copy(os.path.join(script_dir, "vlq_bell_state.py"), run_dir)
+
+    # Create local symlink 'latest_run' -> run_dir for easy user access
+    link_path = os.path.join(script_dir, "latest_run")
+    try:
+        if os.path.islink(link_path) or os.path.exists(link_path):
+            os.remove(link_path)
+        os.symlink(run_dir, link_path)
+    except Exception:
+        pass
+
     print("\n" + "=" * 68)
     print("SLURM QUEUE WAIT & EXECUTION TIME BUDGET ENFORCEMENT")
     print("=" * 68)
@@ -191,18 +239,19 @@ def main():
     print(f"Safety Margin              : {args.margin}s")
     print(f"Max Allowed Queue Delay    : {max_queue_sec}s ({max_queue_sec // 60}m {max_queue_sec % 60}s)")
     print(f"Calculated Slurm --deadline: {deadline_iso}")
+    print(f"Run Directory on Scratch   : {run_dir}")
     print("-" * 68)
     print("Invariant enforced by Slurm scheduler:")
     print("  [Queue Wait Time] + [Job Execution Time] <= [Token Lifetime - Margin]")
     print(f"  If the job waits > {max_queue_sec // 60}m {max_queue_sec % 60}s in queue, Slurm automatically drops it.")
     print("=" * 68 + "\n")
 
-    # Path to submit_lumi.sbatch
-    script_dir = os.path.dirname(os.path.abspath(__file__))
     sbatch_script = os.path.join(script_dir, "submit_lumi.sbatch")
-
     cmd = [
         "sbatch",
+        f"--chdir={run_dir}",
+        f"--output={run_dir}/lumi_iq_%j.out",
+        f"--error={run_dir}/lumi_iq_%j.err",
         f"--time={slurm_time_str}",
         f"--deadline={deadline_iso}",
         sbatch_script,
@@ -216,10 +265,13 @@ def main():
         print(f"\n[SUCCESS] {stdout}")
         job_id = stdout.split()[-1]
         print(f"Job is queued on partition 'small'.")
-        print(f"Check status with : squeue -j {job_id}")
-        print(f"Check deadline with: scontrol show job {job_id} | grep Deadline")
-        print(f"Output log: lumi_iq_{job_id}.out")
-        print(f"Error log:  lumi_iq_{job_id}.err")
+        print(f"Working directory on scratch : {run_dir}")
+        print(f"Symlink created in repo      : ./latest_run -> {run_dir}")
+        print(f"Check status with            : squeue -j {job_id}")
+        print(f"Inspect stdout               : cat {run_dir}/lumi_iq_{job_id}.out")
+        print(f"  (or via symlink)           : cat latest_run/lumi_iq_{job_id}.out")
+        print(f"Inspect stderr               : cat {run_dir}/lumi_iq_{job_id}.err")
+        print(f"Results file (when done)     : {run_dir}/results.json")
     else:
         print(f"\n[ERROR] Slurm submission failed:")
         print(res.stderr)

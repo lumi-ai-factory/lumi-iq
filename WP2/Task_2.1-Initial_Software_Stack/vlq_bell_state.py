@@ -156,3 +156,21 @@ counts = result.get_counts()
 
 print("\n================ Execution Results ================")
 print("Counts:", counts)
+
+# 7. Save results to results.json in working directory (e.g. scratch run folder)
+try:
+    import json
+    results_file = "results.json"
+    results_data = {
+        "job_id": job.job_id(),
+        "resource": resource_name,
+        "lexis_project": lexis_project,
+        "shots": 1024,
+        "counts": counts,
+        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
+    }
+    with open(results_file, "w") as f:
+        json.dump(results_data, f, indent=2)
+    print(f"Results saved to: {os.path.abspath(results_file)}")
+except Exception as e:
+    print(f"Notice: Could not save results.json: {e}")
