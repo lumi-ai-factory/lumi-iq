@@ -17,6 +17,7 @@ It provides an end-to-end operational pipeline connecting the **LUMI supercomput
 | **[auth.py](auth.py)** | Standalone utility to obtain a fresh LEXIS token via OAuth Device Flow. |
 | **[config.py](config.py)** | Centralized configuration loader for LUMI and LEXIS projects. |
 | **[submit_lumi.sbatch](submit_lumi.sbatch)** | Official Slurm batch script template for non-interactive execution on LUMI compute nodes (`project_462001789`). |
+| **[use_cases/](use_cases/)** | Directory containing the 4 standardized WP2 use cases (Car Manufacturing, Health & Life Science, Terrestrial Network, QML Time Series) adapted for LUMI. |
 | **[D2.1_Deliverable_Revised_Sections.md](D2.1_Deliverable_Revised_Sections.md)** | Revision document for Deliverable D2.1 addressing all peer-review comments and LUMI policy compliance. |
 | **[.env.example](.env.example)** | Template for local environment variable configuration (no secrets). |
 

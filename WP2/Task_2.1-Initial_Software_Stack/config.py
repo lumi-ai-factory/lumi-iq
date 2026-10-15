@@ -41,3 +41,21 @@ LEXIS_PROJECT = os.getenv("LEXIS_PROJECT", "vlq_demo_project")
 
 # LEXIS Accounting Resource / QPU Backend (e.g. VLQ-CZ)
 LEXIS_RESOURCE = os.getenv("LEXIS_RESOURCE", "VLQ-CZ")
+
+
+def get_lexis_token() -> str | None:
+    """Retrieves saved LEXIS OAuth token from env or ~/.lumi-iq/token."""
+    token = os.getenv("LEXIS_TOKEN")
+    if token:
+        return token
+    token_file = os.path.expanduser("~/.lumi-iq/token")
+    if os.path.exists(token_file):
+        try:
+            with open(token_file, "r") as f:
+                content = f.read().strip()
+                if content:
+                    return content
+        except Exception:
+            pass
+    return None
+
