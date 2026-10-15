@@ -11,15 +11,12 @@ qc.h(0)
 qc.measure(0, 2)
 # qc.measure_all()
 
-# Check for token in environment or ~/.lumi-iq/pat.token
+# OAuth 2.0 Device Code Flow authentication
+# If LEXIS_TOKEN is not exported in environment, QProvider initiates interactive Device Code Flow
 token = os.getenv("LEXIS_TOKEN")
-pat_file = os.path.expanduser("~/.lumi-iq/pat.token")
-if not token and os.path.exists(pat_file):
-    with open(pat_file) as f:
-        token = f.read().strip()
 
 # 2. Instantiate QProvider with your LEXIS authentication details
-# If token is None, QProvider will launch the interactive OAuth Device Flow in the browser!
+# Passing token=None triggers the interactive OAuth Device Code Flow in the browser!
 lexis_project = "vlq_qaas_project"
 resource_name = "VLQ-CZ-dev_qshceduler-alpha"
 lexis_api_url = "https://api.test.lexis.tech"

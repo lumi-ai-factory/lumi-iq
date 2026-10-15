@@ -31,8 +31,9 @@ elif [ -d "$HOME/lumi-iq-env/bin" ]; then
 fi
 
 # 3. Securely set LEXIS authentication token
-if [ -z "$LEXIS_TOKEN" ] && [ -f "$HOME/.lumi-iq/pat.token" ]; then
-    export LEXIS_TOKEN=$(cat "$HOME/.lumi-iq/pat.token")
+# For batch execution, export LEXIS_TOKEN prior to sbatch (e.g., export LEXIS_TOKEN="...")
+if [ -z "${LEXIS_TOKEN:-}" ]; then
+    echo "Warning: LEXIS_TOKEN is not set in environment. Interactive Device Flow cannot open browser in batch mode."
 fi
 
 # 4. Execute the hybrid quantum workflow on LUMI compute node
