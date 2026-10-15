@@ -4,37 +4,59 @@ This directory contains the 4 domain-specific quantum use cases of the **LUMI-IQ
 
 ---
 
-## Standardized Use Case Matrix
+## 1. Hardware Execution Model: Why & How Each Use Case Runs on VLQ
 
-Every use case adheres to a strictly unified layout featuring both non-interactive CLI / Slurm scripts and interactive JupyterLab notebooks:
+The **VLQ** quantum processor at IT4Innovations is a **24-qubit Star-topology transmon QPU** with native single-qubit rotations (`PRX`) and two-qubit controlled-Z gates (`CZ`).
 
-| # | Use Case Directory | Domain & Problem | Quantum Algorithm / Hardware Target | CLI Runner Script | Open OnDemand Notebook | Output Artifact |
-|---|---|---|---|---|---|---|
-| **1** | **[01_car_manufacturing](01_car_manufacturing/)** | Automotive Quality Assurance (Rare Defect Detection) | 4-qubit `ZZFeatureMap` Quantum Fidelity Statevector Kernel | `python run_car_manufacturing.py` | `car_manufacturing.ipynb` | `result_car_manufacturing.png` |
-| **2** | **[02_health_life_science](02_health_life_science/)** | Computational Chemistry (Molecular Ground State Energy) | VQE (`EfficientSU2` ansatz + SPSA) & Classical Shadows Observable Estimation (VLQ QPU & Aer) | `python run_health_vqe.py --backend [SIM\|VLQ]` | `health_vqe.ipynb` | `result_health.png` |
-| **3** | **[03_terrestrial_network](03_terrestrial_network/)** | Telecommunications (Energy-Efficient Traffic Routing) | QUBO & Ising Mapping, BF-DCQO vs. QAOA, Native IQM Star Transpilation | `python run_terrestrial_network.py` | `terrestrial_network.ipynb` | `result_terrestrial_network.png` |
-| **4** | **[04_qml_time_series](04_qml_time_series/)** | Energy Market Forecasting (Hourly Electricity Prices) | 8-qubit QNN Regressor (`ZFeatureMap` + `EfficientSU2` 80-parameter PQC) | `python run_time_series_forecasting.py` | `time_series_forecasting.ipynb` | `result_time_series.png` |
+All 4 use cases require between **4 and 8 qubits**, making them an architectural match for VLQ. To maximize performance and respect queue limits, each use case implements an intelligent **hybrid classical-quantum execution partitioning**:
+
+| # | Use Case | Qubits | Classical HPC Role (LUMI) | Quantum QPU Role (VLQ) | Real VLQ Command |
+|---|---|---|---|---|---|
+| **1** | **[01_car_manufacturing](01_car_manufacturing/)** | 4 Qubits | Full dataset baseline training and classical baselines (SVM, Isolation Forest) | Evaluates 4-qubit overlap fidelity circuits $U(x_{\text{ref}})^\dagger U(x_{\text{test}})$ on VLQ QPU | `python run_car_manufacturing.py --backend VLQ` |
+| **2** | **[02_health_life_science](02_health_life_science/)** | 4 Qubits | PySCF Hartree-Fock calculation, active space selection, Jordan-Wigner Hamiltonian | Executes VQE parameter optimization and Classical Shadows snapshot measurements | `python run_health_vqe.py --backend VLQ` |
+| **3** | **[03_terrestrial_network](03_terrestrial_network/)** | 8 Qubits | QUBO formulation, Ising Hamiltonian mapping, and analytical parameter calculation | Evaluates 8-qubit BF-DCQO routing circuit transpiled to native IQM Star gates (`CZ`, `PRX`) | `python run_terrestrial_network.py --backend VLQ` |
+| **4** | **[04_qml_time_series](04_qml_time_series/)** | 8 Qubits | COBYLA optimization of 80 variational $\theta$ parameters on CPU | Dispatches the 1-hour ahead price forecast circuit to VLQ, measuring $\langle Z_0 \rangle$ | `python run_time_series_forecasting.py --backend VLQ` |
 
 ---
 
-## Universal Execution on LUMI
+## 2. Standardized Directory Layout
+
+Every use case folder adheres to a strictly identical architecture:
+
+```
+use_cases/<use_case_dir>/
+├── README.md               # Dedicated documentation and execution guide
+├── run_<name>.py           # Standalone Python script with '--backend SIM' and '--backend VLQ'
+├── <name>.ipynb            # Interactive notebook for LUMI Open OnDemand JupyterLab
+└── result_<name>.png       # Standardized benchmark evaluation visualization
+```
+
+---
+
+## 3. Universal Execution on LUMI
 
 All four use cases use the single unified `lumi-iq` environment module. No local `venv` or `pip install` commands are needed.
 
-### 1. Terminal / Slurm Batch Execution
+### Terminal / Slurm Batch Execution
 ```bash
-# One-time activation in any session:
+# 1. Activate module in any terminal session:
 module use $HOME/modulefiles
 module load lumi-iq
 
-# Run any use case directly:
-cd WP2/Task_2.1-Initial_Software_Stack/use_cases/01_car_manufacturing && python run_car_manufacturing.py
+# 2. Run on local simulator (fast test):
+cd WP2/Task_2.1-Initial_Software_Stack/use_cases/01_car_manufacturing && python run_car_manufacturing.py --backend SIM
 cd ../02_health_life_science && python run_health_vqe.py --backend SIM
-cd ../03_terrestrial_network && python run_terrestrial_network.py
-cd ../04_qml_time_series && python run_time_series_forecasting.py
+cd ../03_terrestrial_network && python run_terrestrial_network.py --backend SIM
+cd ../04_qml_time_series && python run_time_series_forecasting.py --backend SIM
+
+# 3. Or submit directly to real VLQ hardware (uses ~/.lumi-iq/token automatically):
+python run_car_manufacturing.py --backend VLQ
+python run_health_vqe.py --backend VLQ --shots 256
+python run_terrestrial_network.py --backend VLQ --shots 1024
+python run_time_series_forecasting.py --backend VLQ --shots 1024
 ```
 
-### 2. Interactive JupyterLab on LUMI Open OnDemand (lumi.csc.fi)
+### Interactive JupyterLab on LUMI Open OnDemand (lumi.csc.fi)
 1. Start Jupyter on [lumi.csc.fi](https://lumi.csc.fi) with **Custom Python type**: `Script` (`module use $HOME/modulefiles && module load lumi-iq`).
 2. Open any `.ipynb` notebook from the directories above.
-3. Run all cells sequentially.
+3. Toggle `TARGET_BACKEND = "SIM"` or `"VLQ"` in the setup cell and run all cells sequentially.
