@@ -21,31 +21,38 @@ It provides an end-to-end operational pipeline connecting the **LUMI supercomput
 
 ---
 
-## Quick Start for New Users (3 Steps to First Execution)
+## Quick Start for New Users (4 Simple Steps)
 
-### 1. One-time Setup on LUMI login node (`uan`):
-Containerize dependencies into a SquashFS image (Tykky) and register Lmod module:
+### Step 1: Clone the repository (on LUMI login node `uan`)
 ```bash
-cd ~/lumi-iq/WP2/Task_2.1-Initial_Software_Stack
+git clone https://opencode.it4i.eu/qclab/lumi-iq.git
+cd lumi-iq/WP2/Task_2.1-Initial_Software_Stack
+git checkout task-2.1-initial-software-stack
+```
+
+### Step 2: Build software environment (One-time Setup, ~2-3 min)
+Containerize dependencies into a SquashFS image via LUMI Tykky and register Lmod module:
+```bash
 bash build_tykky_module.sh
 bash setup_lumi_module.sh
 ```
 
-### 2. Activate environment:
+### Step 3: Activate the module
 ```bash
 module use $HOME/modulefiles
 module load lumi-iq
 ```
-*(Loaded automatically in subsequent sessions via `~/.bashrc`)*
+*(This is automatically added to your `~/.bashrc` for future sessions).*
 
-### 3. Run your first quantum calculation on VLQ via Slurm:
+### Step 4: Submit your first quantum computation to VLQ
 ```bash
 python submit_job.py
 ```
-- On first launch, follow the terminal URL to log in via browser (OAuth 2.0 Device Flow).
-- The token is securely saved to `~/.lumi-iq/token` (`chmod 600`).
-- The job is queued in Slurm (`project_462001789`), bounded by token validity (`--deadline`).
-- All outputs are stored cleanly on `$SCRATCH`. Subsequent runs need no browser interaction!
+- **First launch (browser authentication):** The terminal prints a URL and 8-character user code. Follow the link to log in via browser (OAuth 2.0 Device Flow).
+- **Security:** Token is saved to `~/.lumi-iq/token` with strict `chmod 600` permissions.
+- **Queue-aware scheduling:** The job is submitted to Slurm (`project_462001789`) with runtime `--time` and queue wait limit `--deadline`.
+- **Scratch execution:** All logs and `results.json` are isolated in `$SCRATCH`.
+- **Future runs:** Just run `python submit_job.py` directly without browser intervention!
 
 ---
 
