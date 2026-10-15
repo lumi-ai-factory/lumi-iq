@@ -5,9 +5,9 @@
 
 set -euo pipefail
 
-MODULE_ROOT="${HOME}/modulefiles"
-MODULE_DIR="${MODULE_ROOT}/lumi-iq"
 ENV_DIR="${1:-$HOME/lumi-iq-env}"
+MODULE_ROOT="${2:-${HOME}/modulefiles}"
+MODULE_DIR="${MODULE_ROOT}/lumi-iq"
 
 echo "Creating Lmod module for LUMI-IQ..."
 mkdir -p "$MODULE_DIR"

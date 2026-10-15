@@ -14,6 +14,8 @@ It provides an end-to-end operational pipeline connecting the **LUMI supercomput
 | **[vlq_bell_state.py](vlq_bell_state.py)** | Standalone Python script executable in batch mode via Slurm. |
 | **[requirements.txt](requirements.txt)** | Python dependencies referencing the IT4Innovations private PyPI repository for `qaas[iqm_qiskit]`, `iqm-client`, and Qiskit. |
 | **[build_tykky_module.sh](build_tykky_module.sh)** | Script to containerize the software environment on LUMI using the **Tykky wrapper (`pip-containerize`)**, complying with the LUMI Lustre parallel file system policy. |
+| **[setup_lumi_module.sh](setup_lumi_module.sh)** | Script to configure a personal Lmod modulefile (`$HOME/modulefiles/lumi-iq/1.0.lua`). |
+| **[deploy_shared_module.sh](deploy_shared_module.sh)** | Deploys container and modulefiles into the shared project space (`/project/project_462001789/`) for all users. |
 | **[auth.py](auth.py)** | Standalone utility to obtain a fresh LEXIS token via OAuth Device Flow. |
 | **[config.py](config.py)** | Centralized configuration loader for LUMI and LEXIS projects. |
 | **[submit_lumi.sbatch](submit_lumi.sbatch)** | Official Slurm batch script template for non-interactive execution on LUMI compute nodes (`project_462001789`). |
@@ -81,6 +83,40 @@ Everything runs directly via standard Lmod environment modules:
    ```
 
 *(If you are working in LUMI Open OnDemand JupyterLab, simply open the built-in **Terminal** and use the exact same commands).*
+
+---
+
+## 2. Shared Multi-User Deployment (`/project/project_462001789/`)
+
+To allow **all researchers and consortium users** in the project to use the software stack without needing to build the container themselves:
+
+### Deploying the Shared Module (One-Time by Project Lead):
+```bash
+bash deploy_shared_module.sh project_462001789
+```
+This automatically:
+1. Deploys the Tykky container into `/project/project_462001789/software/lumi-iq-env`.
+2. Enforces read/execute group and other permissions (`chmod -R g+rX,o+rX`).
+3. Registers shared modulefiles in `/project/project_462001789/modulefiles`:
+   - `lumi-iq/1.0`
+   - `LUMI-IQ-qaas/VLQ` (official Deliverable D2.1 naming scheme)
+
+### How Any Project Member Loads the Shared Module:
+Any user on LUMI with access to project `project_462001789` can simply run:
+
+```bash
+module use /project/project_462001789/modulefiles
+module load lumi-iq
+```
+
+*(Or add `echo "module use /project/project_462001789/modulefiles" >> ~/.bashrc` to make it permanently available).*
+
+In **LUMI Open OnDemand (lumi.csc.fi)**, users simply put:
+```bash
+module use /project/project_462001789/modulefiles
+module load lumi-iq
+```
+under **Advanced &rarr; Script or path to script**. All users immediately get access to the unified stack and use cases!
 
 ---
 
