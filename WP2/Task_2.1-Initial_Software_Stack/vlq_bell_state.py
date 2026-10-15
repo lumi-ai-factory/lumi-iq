@@ -1,4 +1,14 @@
 import os
+# Compatibility shim: qheappe_client.utils erroneously imports JobStatus from iqm_server_client instead of iqm_client
+import iqm.iqm_server_client.models
+try:
+    from iqm.iqm_client.models import JobStatus
+except ImportError:
+    from qiskit.providers.jobstatus import JobStatus
+if not hasattr(JobStatus, "COMPLETED") and hasattr(JobStatus, "DONE"):
+    JobStatus.COMPLETED = JobStatus.DONE
+iqm.iqm_server_client.models.JobStatus = JobStatus
+
 from qiskit import QuantumCircuit
 from qheappe_client.qprovider import QProvider
 
