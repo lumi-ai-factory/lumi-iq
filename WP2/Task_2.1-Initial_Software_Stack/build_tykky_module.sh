@@ -18,21 +18,26 @@ echo "Target directory: $TARGET_DIR"
 echo "Requirements file: $REQUIREMENTS_FILE"
 
 # 1. Load LUMI container wrapper module (Tykky)
-# On LUMI, pip-containerize is provided by the lumi-container-wrapper module
+module load LUMI lumi-container-wrapper 2>/dev/null || module load lumi-container-wrapper 2>/dev/null || true
+
+# Robust fallback to LUMI system path if Lmod hierarchy differs:
 if ! command -v pip-containerize &>/dev/null; then
-    module load lumi-container-wrapper 2>/dev/null || module load LUMI lumi-container-wrapper 2>/dev/null || true
+    for candidate in /appl/lumi/SW/LUMI-*/common/EB/lumi-container-wrapper/*/bin/pip-containerize; do
+        if [ -x "$candidate" ]; then
+            export PATH="$(dirname "$candidate"):$PATH"
+            break
+        fi
+    done
 fi
 
 if ! command -v pip-containerize &>/dev/null; then
-    echo "ERROR: pip-containerize command not found."
-    echo "Trying: module spider lumi-container-wrapper"
+    echo "ERROR: pip-containerize not found. Please run: module load LUMI lumi-container-wrapper"
     exit 1
 fi
 
 echo "Using pip-containerize: $(which pip-containerize)"
 
 # 2. Run pip-containerize to build containerized environment
-# Note: --extra-index-url is already specified inside requirements.txt
 pip-containerize new \
     --prefix "$TARGET_DIR" \
     "$REQUIREMENTS_FILE"
@@ -40,4 +45,3 @@ pip-containerize new \
 echo "=== Tykky Container Built Successfully! ==="
 echo "To use this environment on LUMI:"
 echo "  export PATH=\"$TARGET_DIR/bin:\$PATH\""
-echo "Or load via Lmod module: module load LUMI-IQ-qaas/VLQ"
