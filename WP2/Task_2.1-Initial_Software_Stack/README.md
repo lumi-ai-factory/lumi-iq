@@ -140,12 +140,12 @@ python submit_job.py --walltime 00:10:00 --margin 120
 ```
 
 `submit_job.py` automatically:
-1. Validates or obtains the OAuth token, saving it to `~/.lumi-iq/token` and `~/.lumi-iq/refresh_token` (`chmod 600`).
+1. Validates or obtains the OAuth token, saving it to `~/.lumi-iq/token` (`chmod 600`).
 2. Calculates exact token expiration timestamp and sets `--deadline` in Slurm.
 3. Enforces the invariant:
    $$\text{Queue Wait Time} + \text{Execution Walltime} \le \text{Token Validity} - \text{Safety Margin}$$
    If the job waits too long in the Slurm queue and cannot complete before token expiration, Slurm automatically cancels it (`DEADLINE`) rather than dispatching it with expired credentials.
-4. If the token approaches expiry, it automatically attempts non-interactive renewal using the saved refresh token.
+4. If the token is missing or expired, it automatically triggers a fresh re-authentication via Device Code Flow.
 
 ### Manual Submission
 Alternatively, submit directly via `sbatch` using the saved token:

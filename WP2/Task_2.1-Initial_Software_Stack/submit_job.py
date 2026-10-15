@@ -3,8 +3,7 @@
 LUMI-IQ Automated Slurm Job Submitter with Queue-Aware Lifetime Enforcement:
 
 1. Obtains/loads the LEXIS OAuth access token at ~/.lumi-iq/token (mode 0600).
-2. Obtains/loads the LEXIS OAuth refresh token at ~/.lumi-iq/refresh_token (mode 0600).
-3. Decodes JWT expiration (exp claim) to determine exact remaining token lifetime.
+2. Decodes JWT expiration (exp claim) to determine exact remaining token lifetime.
 4. Accounts for BOTH:
    - Execution walltime on the compute node (--time)
    - Wait time spent pending in the Slurm queue (--deadline)
