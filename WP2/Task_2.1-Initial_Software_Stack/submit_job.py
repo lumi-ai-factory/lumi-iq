@@ -136,9 +136,26 @@ def main():
         help=f"LUMI Slurm project account (default: {LUMI_PROJECT})",
     )
     parser.add_argument(
+        "--use-case",
+        choices=["1", "2", "3", "4", "all", "bell"],
+        default="bell",
+        help="Target use case to run as Slurm HPC job (1, 2, 3, 4, all, or bell; default: bell)",
+    )
+    parser.add_argument(
+        "--backend",
+        choices=["VLQ", "SIM"],
+        default="VLQ",
+        help="Execution target backend: 'VLQ' (real QPU offload) or 'SIM' (simulation on compute node; default: VLQ)",
+    )
+    parser.add_argument(
+        "--script",
+        default=None,
+        help="Custom Python script to execute inside the Slurm HPC job",
+    )
+    parser.add_argument(
         "--walltime",
-        default="00:05:00",
-        help="Job execution walltime limit HH:MM:SS (default: 00:05:00)",
+        default=None,
+        help="Job execution walltime limit HH:MM:SS (default depends on use case: 00:05:00 to 00:30:00)",
     )
     parser.add_argument(
         "--margin",
@@ -153,10 +170,31 @@ def main():
     )
     args = parser.parse_args()
 
-    walltime_sec = parse_time_to_seconds(args.walltime)
+    # Map use cases to scripts and arguments
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    use_case_map = {
+        "bell": (os.path.join(script_dir, "vlq_bell_state.py"), "", "00:05:00"),
+        "1": (os.path.join(script_dir, "use_cases/01_car_manufacturing/run_car_manufacturing.py"), f"--backend {args.backend}", "00:15:00"),
+        "2": (os.path.join(script_dir, "use_cases/02_health_life_science/run_health_vqe.py"), f"--backend {args.backend}", "00:20:00"),
+        "3": (os.path.join(script_dir, "use_cases/03_terrestrial_network/run_terrestrial_network.py"), f"--backend {args.backend}", "00:10:00"),
+        "4": (os.path.join(script_dir, "use_cases/04_qml_time_series/run_time_series_forecasting.py"), f"--backend {args.backend}", "00:15:00"),
+        "all": (os.path.join(script_dir, "run_all_tests.py"), f"--backend {args.backend}", "00:30:00"),
+    }
+
+    if args.script:
+        target_script = os.path.abspath(args.script)
+        target_args = f"--backend {args.backend}"
+        default_walltime = "00:15:00"
+    else:
+        target_script, target_args, default_walltime = use_case_map[args.use_case]
+
+    walltime_str = args.walltime if args.walltime else default_walltime
+    walltime_sec = parse_time_to_seconds(walltime_str)
     min_required_sec = walltime_sec + args.margin
 
     print("=== LUMI-IQ Slurm Job Submitter ===")
+    print(f"Target Workload : {'Use Case ' + args.use_case if args.use_case != 'all' else 'All Tests'} ({os.path.basename(target_script)})")
+    print(f"Target Backend  : {args.backend}")
     token, exp, rem = obtain_or_load_token(min_required_sec=min_required_sec)
 
     now = int(time.time())
@@ -229,6 +267,7 @@ def main():
         f"--error={run_dir}/lumi_iq_%j.err",
         f"--time={slurm_time_str}",
         f"--deadline={deadline_iso}",
+        f"--export=ALL,TARGET_SCRIPT={target_script},TARGET_ARGS={target_args}",
         sbatch_script,
     ]
 

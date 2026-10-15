@@ -54,17 +54,19 @@ if [ -z "${LEXIS_TOKEN:-}" ] && [ ! -f "$TOKEN_FILE" ]; then
     exit 1
 fi
 
-# 4. Locate target script (current scratch directory or submit directory)
-if [ -f "./vlq_bell_state.py" ]; then
-    TARGET_SCRIPT="./vlq_bell_state.py"
-elif [ -n "${SLURM_SUBMIT_DIR:-}" ] && [ -f "$SLURM_SUBMIT_DIR/vlq_bell_state.py" ]; then
-    TARGET_SCRIPT="$SLURM_SUBMIT_DIR/vlq_bell_state.py"
-else
-    TARGET_SCRIPT="vlq_bell_state.py"
+# 4. Locate target script and arguments
+TARGET_SCRIPT="${TARGET_SCRIPT:-./vlq_bell_state.py}"
+TARGET_ARGS="${TARGET_ARGS:-}"
+
+if [ ! -f "$TARGET_SCRIPT" ] && [ -n "${SLURM_SUBMIT_DIR:-}" ] && [ -f "$SLURM_SUBMIT_DIR/$TARGET_SCRIPT" ]; then
+    TARGET_SCRIPT="$SLURM_SUBMIT_DIR/$TARGET_SCRIPT"
 fi
 
-# 5. Execute the hybrid quantum workflow on LUMI compute node
-echo "Executing quantum circuit on VLQ QPU ($TARGET_SCRIPT)..."
-srun python -u "$TARGET_SCRIPT"
+# 5. Execute the hybrid quantum workflow on LUMI compute node with QPU offload
+echo "Executing hybrid quantum workflow on LUMI compute node:"
+echo "Script : $TARGET_SCRIPT"
+echo "Args   : $TARGET_ARGS"
+echo "--------------------------------------------------------"
+srun python -u "$TARGET_SCRIPT" $TARGET_ARGS
 
 echo "=== Job Completed Successfully ==="
