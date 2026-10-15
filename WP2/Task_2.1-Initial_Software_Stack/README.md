@@ -15,7 +15,7 @@ It provides an end-to-end operational pipeline connecting the **LUMI supercomput
 | **[requirements.txt](requirements.txt)** | Python dependencies referencing the IT4Innovations private PyPI repository for `qaas[iqm_qiskit]`, `iqm-client`, and Qiskit. |
 | **[build_tykky_module.sh](build_tykky_module.sh)** | Script to containerize the software environment on LUMI using the **Tykky wrapper (`pip-containerize`)**, complying with the LUMI Lustre parallel file system policy. |
 | **[setup_lumi_jupyter.sh](setup_lumi_jupyter.sh)** | Script to register the Tykky container as an official Jupyter kernel in **LUMI Open OnDemand** (`www.lumi.csc.fi`). |
-| **[submit_lumi.sbatch](submit_lumi.sbatch)** | Official Slurm batch script template for non-interactive execution on LUMI compute nodes (`project_465003105`). |
+| **[submit_lumi.sbatch](submit_lumi.sbatch)** | Official Slurm batch script template for non-interactive execution on LUMI compute nodes (`project_462001789`). |
 | **[D2.1_Deliverable_Revised_Sections.md](D2.1_Deliverable_Revised_Sections.md)** | Revision document for Deliverable D2.1 addressing all peer-review comments and LUMI policy compliance. |
 | **[.env.example](.env.example)** | Template for local environment variable configuration (no secrets). |
 
@@ -25,7 +25,7 @@ It provides an end-to-end operational pipeline connecting the **LUMI supercomput
 
 1. Navigate to **[www.lumi.csc.fi](https://www.lumi.csc.fi)** and select **Interactive Apps -> Jupyter**.
 2. Configure your session:
-   - **Project**: `project_465003105`
+   - **Project**: `project_462001789`
    - **Partition**: `interactive`
    - **Time**: `1:00:00`
 3. Launch the session and open the built-in **Terminal** in JupyterLab.

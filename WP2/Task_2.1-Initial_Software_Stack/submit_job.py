@@ -147,7 +147,7 @@ def parse_time_to_seconds(time_str: str) -> int:
     raise ValueError(f"Invalid time format: {time_str}")
 
 
-def resolve_scratch_base(custom_dir: str | None = None) -> str:
+def resolve_scratch_base(custom_dir: str | None = None, account: str = "project_462001789") -> str:
     """Resolves LUMI scratch directory for job runs."""
     if custom_dir:
         return os.path.abspath(custom_dir)
@@ -158,8 +158,8 @@ def resolve_scratch_base(custom_dir: str | None = None) -> str:
             return os.path.join(scratch, user, "lumi-iq-jobs")
         return os.path.join(scratch, "lumi-iq-jobs")
     for candidate in [
-        f"/scratch/project_465003105/{user}/lumi-iq-jobs",
-        f"/scratch/project_465003105/lumi-iq-jobs",
+        f"/scratch/{account}/{user}/lumi-iq-jobs",
+        f"/scratch/{account}/lumi-iq-jobs",
         os.path.expanduser("~/scratch/lumi-iq-jobs"),
     ]:
         if os.path.exists(os.path.dirname(candidate)):
@@ -170,6 +170,11 @@ def resolve_scratch_base(custom_dir: str | None = None) -> str:
 def main():
     parser = argparse.ArgumentParser(
         description="LUMI-IQ Slurm Submitter with Queue-Aware Lifetime Enforcement & Scratch Execution"
+    )
+    parser.add_argument(
+        "--account",
+        default=os.getenv("LUMI_ACCOUNT", "project_462001789"),
+        help="LUMI Slurm project account (default: project_462001789)",
     )
     parser.add_argument(
         "--walltime",
@@ -213,7 +218,7 @@ def main():
 
     # Setup dedicated execution run directory on SCRATCH
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    scratch_base = resolve_scratch_base(args.scratch_dir)
+    scratch_base = resolve_scratch_base(args.scratch_dir, account=args.account)
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     run_dir = os.path.join(scratch_base, f"run_{timestamp}")
     os.makedirs(run_dir, exist_ok=True)
@@ -241,6 +246,7 @@ def main():
     print("\n" + "=" * 68)
     print("SLURM QUEUE WAIT & EXECUTION TIME BUDGET ENFORCEMENT")
     print("=" * 68)
+    print(f"LUMI Slurm Account         : {args.account}")
     print(f"Token Expiration Timestamp : {datetime.datetime.fromtimestamp(exp).strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"Total Remaining Lifetime   : {rem}s ({rem // 60}m {rem % 60}s)")
     print(f"Configured Walltime (--time): {slurm_time_str} ({walltime_sec}s)")
@@ -257,6 +263,7 @@ def main():
     sbatch_script = os.path.join(script_dir, "submit_lumi.sbatch")
     cmd = [
         "sbatch",
+        f"--account={args.account}",
         f"--chdir={run_dir}",
         f"--output={run_dir}/lumi_iq_%j.out",
         f"--error={run_dir}/lumi_iq_%j.err",

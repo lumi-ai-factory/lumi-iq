@@ -5,7 +5,7 @@
 # ==============================================================================
 
 #SBATCH --job-name=lumi-iq-vlq
-#SBATCH --account=project_465003105        # Your LUMI project ID
+#SBATCH --account=project_462001789        # Your LUMI project ID
 #SBATCH --partition=small                  # 'small' partition for sub-node CPU allocation
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
