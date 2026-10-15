@@ -56,22 +56,30 @@ python submit_job.py
 
 ---
 
-## 1. Interactive Execution on LUMI Open OnDemand (JupyterLab)
+## 1. Environment Loading via Lmod Modules (Pure CLI / No Jupyter Kernels)
 
-1. Navigate to **[www.lumi.csc.fi](https://www.lumi.csc.fi)** and select **Interactive Apps -> Jupyter**.
-2. Configure your session:
-   - **Project**: `project_462001789`
-   - **Partition**: `interactive`
-   - **Time**: `1:00:00`
-3. Launch the session and open the built-in **Terminal** in JupyterLab.
-4. Run the Tykky build and kernel registration (one-time setup):
+No Jupyter kernels or kernel registration files are needed. Everything runs directly via standard Lmod environment modules:
+
+1. **Load the module**:
    ```bash
-   cd WP2/Task_2.1-Initial_Software_Stack
-   bash build_tykky_module.sh
-   bash setup_lumi_jupyter.sh
+   module use $HOME/modulefiles
+   module load lumi-iq
    ```
-5. Reload JupyterLab, open **`vlq_bell_state.ipynb`**, and select the kernel **`LUMI-IQ (Python 3.12 - VLQ Quantum)`**.
-6. Execute cells interactively. In Step 3, follow the link to authenticate via **MyAccessID** (OAuth Device Flow).
+
+2. **Verify active Python environment**:
+   ```bash
+   which python
+   python -c "import qaas, qiskit; print('LUMI-IQ environment ready!')"
+   ```
+
+3. **Run your scripts or submit jobs**:
+   ```bash
+   python submit_job.py      # Submit batch job to Slurm
+   # or run locally:
+   python vlq_bell_state.py  # Run directly on login/interactive node
+   ```
+
+*(If you are working in LUMI Open OnDemand JupyterLab, simply open the built-in **Terminal** and use the exact same commands).*
 
 ---
 
