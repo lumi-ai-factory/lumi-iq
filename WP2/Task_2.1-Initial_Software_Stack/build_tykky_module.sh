@@ -43,6 +43,5 @@ conda-containerize new \
     "$ENV_FILE"
 
 echo "=== Tykky Container Built Successfully! ==="
-echo "To use this environment on LUMI:"
-echo "  export PATH=\"$TARGET_DIR/bin:\$PATH\""
-echo "Or load via Jupyter kernel: LUMI-IQ (Python 3.12 - VLQ Quantum)"
+echo "Next step: configure the Lmod module:"
+echo "  bash setup_lumi_module.sh"
