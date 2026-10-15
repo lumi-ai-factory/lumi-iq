@@ -181,34 +181,45 @@ Follow the terminal link to log in (OAuth 2.0 Device Flow). The fresh token is s
 
 ---
 
-## 4. Non-Interactive Batch Execution on LUMI (Slurm)
+## 4. Hybrid HPC-QC Batch Execution on LUMI (Slurm)
 
-To run unattended batch jobs without browser prompts while preventing token expiration in the queue:
+In compliance with the **LUMI Acceptable Use Policy**, production workloads and heavy classical computation (e.g. PySCF electronic structure integrals in UC 2, QUBO formulation in UC 3, QNN inference and optimization in UC 4) must **not** run on login nodes (`uan`). Instead, workloads run on dedicated LUMI compute nodes via Slurm, offloading quantum circuits to the IT4Innovations VLQ QPU across the network.
 
-### Automated Queue-Aware Submission (Recommended)
-Use `submit_job.py` to authenticate, persist credentials with `chmod 600`, and dynamically enforce both execution walltime (`--time`) and Slurm queue deadline (`--deadline`):
+### Automated Queue-Aware Submission (`submit_job.py`)
+`submit_job.py` submits any WP2 use case, custom script, or the full test suite to Slurm (`project_462001789`):
 
 ```bash
 cd WP2/Task_2.1-Initial_Software_Stack
 
-# Submit job with default 5-minute walltime and 60s safety margin:
-python submit_job.py
+# Run Use Case 4 (Electricity Price Forecasting) as an HPC job with VLQ QPU offload:
+python submit_job.py --use-case 4 --backend VLQ
 
-# Or specify custom walltime:
-python submit_job.py --walltime 00:10:00 --margin 120
+# Run Use Case 2 (Health & Life Science VQE) as an HPC job:
+python submit_job.py --use-case 2 --backend VLQ
+
+# Run Use Case 1 (Car Manufacturing Anomaly Detection):
+python submit_job.py --use-case 1 --backend VLQ
+
+# Run Use Case 3 (Terrestrial Network QKD Routing):
+python submit_job.py --use-case 3 --backend VLQ
+
+# Run the complete Master Test Suite across all 4 use cases on an HPC compute node:
+python submit_job.py --use-case all --backend VLQ
+
+# Run demo Bell state benchmark:
+python submit_job.py --use-case bell
 ```
 
 `submit_job.py` automatically:
-1. Validates or obtains the OAuth token, saving it to `~/.lumi-iq/token` (`chmod 600`).
+1. Validates or refreshes the OAuth token, saving it to `~/.lumi-iq/token` (`chmod 600`).
 2. Calculates exact token expiration timestamp and sets `--deadline` in Slurm.
 3. Enforces the invariant:
    $$\text{Queue Wait Time} + \text{Execution Walltime} \le \text{Token Validity} - \text{Safety Margin}$$
    If the job waits too long in the Slurm queue and cannot complete before token expiration, Slurm automatically cancels it (`DEADLINE`) rather than dispatching it with expired credentials.
-4. If the token is missing or expired, it automatically triggers a fresh re-authentication via Device Code Flow.
+4. Isolates execution, logs, and outputs to `$SCRATCH/$USER/lumi-iq-jobs/run_<timestamp>/`, preserving a clean git working tree.
 
 ### Manual Submission
 Alternatively, submit directly via `sbatch` using the saved token:
-
 ```bash
 sbatch submit_lumi.sbatch
 ```
@@ -224,15 +235,17 @@ cat lumi_iq_<JOB_ID>.out
 
 ## 5. Automated Master Test Suite (`run_all_tests.sh`)
 
-To verify the entire software stack, LEXIS / QPU connectivity, and all 4 WP2 use cases with a single automated command:
+The master test suite can be executed in two modes:
 
+### Mode A: Interactive Execution on Login Node (Fast Verification / Debugging)
+Useful for rapid development, testing in simulation, or live terminal feedback:
 ```bash
 cd WP2/Task_2.1-Initial_Software_Stack
 
 # Fast local simulation mode (tests all 4 use cases + stack in ~1-2 minutes):
 bash run_all_tests.sh --backend SIM
 
-# Full hardware execution mode (dispatches circuits to IT4I VLQ 24-Qubit QPU):
+# Interactive execution with real VLQ QPU offload:
 bash run_all_tests.sh --backend VLQ
 
 # Run selected use cases only (e.g. Use Case 2 & 4):
@@ -242,7 +255,18 @@ bash run_all_tests.sh --use-cases 2,4
 bash run_all_tests.sh --skip-use-cases
 ```
 
-The script automatically:
+### Mode B: Unattended Slurm HPC Job on LUMI Compute Node (Recommended for Production)
+Submits the entire verification pipeline to Slurm compute nodes with QPU offload:
+```bash
+# Submit full test suite to Slurm compute node with VLQ QPU offload:
+bash run_all_tests.sh --backend VLQ --slurm
+
+# Or submit simulation verification to Slurm:
+bash run_all_tests.sh --backend SIM --slurm
+```
+*(This is functionally equivalent to `python submit_job.py --use-case all --backend VLQ`).*
+
+The test suite automatically:
 1. Loads the `lumi-iq` Lmod module if running in a fresh shell.
 2. Checks all core Python packages (`qiskit`, `qiskit_aer`, `qaas`, `py4lexis`, `scipy`, `sklearn`, `pandas`, `networkx`, `matplotlib`, `dill`, `pyscf`).
 3. Verifies active LEXIS credentials (`~/.lumi-iq/token`) and QPU target (`VLQ-CZ`).

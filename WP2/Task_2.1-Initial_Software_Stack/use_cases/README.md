@@ -60,3 +60,24 @@ python run_time_series_forecasting.py --backend VLQ --shots 1024
 1. Start Jupyter on [lumi.csc.fi](https://lumi.csc.fi) with **Custom Python type**: `Script` (`module use $HOME/modulefiles && module load lumi-iq`).
 2. Open any `.ipynb` notebook from the directories above.
 3. Toggle `TARGET_BACKEND = "SIM"` or `"VLQ"` in the setup cell and run all cells sequentially.
+
+---
+
+## 4. Submitting as an Unattended Slurm HPC Job on LUMI
+
+In compliance with LUMI fair-use policy, production and heavy classical computation can be submitted directly to Slurm compute nodes with QPU offload via `submit_job.py`:
+
+```bash
+cd WP2/Task_2.1-Initial_Software_Stack
+
+# Submit individual use cases to Slurm with real VLQ QPU offload:
+python submit_job.py --use-case 1 --backend VLQ   # Car Manufacturing
+python submit_job.py --use-case 2 --backend VLQ   # Health Life Science VQE
+python submit_job.py --use-case 3 --backend VLQ   # Terrestrial Network Routing
+python submit_job.py --use-case 4 --backend VLQ   # QML Time Series
+
+# Submit all 4 use cases & master test suite to Slurm:
+python submit_job.py --use-case all --backend VLQ
+# (or: bash run_all_tests.sh --backend VLQ --slurm)
+```
+
