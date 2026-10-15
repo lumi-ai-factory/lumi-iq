@@ -14,8 +14,8 @@ token = os.getenv("LEXIS_TOKEN")
 
 # 2. Instantiate QProvider with your LEXIS project
 # Passing token=None triggers the interactive OAuth Device Code Flow in the browser!
-lexis_project = os.getenv("LEXIS_PROJECT", "vlq_qaas_project")
-resource_name = os.getenv("LEXIS_RESOURCE", "VLQ-CZ-dev_qshceduler-alpha")
+lexis_project = os.getenv("LEXIS_PROJECT", "vlq_demo_project")
+resource_name = os.getenv("LEXIS_RESOURCE", "VLQ-CZ")
 
 print(f"Connecting to LEXIS project: {lexis_project}...")
 provider = QProvider(
