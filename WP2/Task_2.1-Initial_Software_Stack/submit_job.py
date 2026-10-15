@@ -221,12 +221,20 @@ def main():
     # Copy script into run_dir for reproducibility and direct execution
     shutil.copy(os.path.join(script_dir, "vlq_bell_state.py"), run_dir)
 
-    # Create local symlink 'latest_run' -> run_dir for easy user access
-    link_path = os.path.join(script_dir, "latest_run")
+    # Clean up any leftover symlink in repo so git workspace stays 100% clean
+    repo_link = os.path.join(script_dir, "latest_run")
+    if os.path.islink(repo_link) or os.path.exists(repo_link):
+        try:
+            os.remove(repo_link)
+        except Exception:
+            pass
+
+    # Create 'latest' symlink strictly on $SCRATCH
+    scratch_latest = os.path.join(scratch_base, "latest")
     try:
-        if os.path.islink(link_path) or os.path.exists(link_path):
-            os.remove(link_path)
-        os.symlink(run_dir, link_path)
+        if os.path.islink(scratch_latest) or os.path.exists(scratch_latest):
+            os.remove(scratch_latest)
+        os.symlink(run_dir, scratch_latest)
     except Exception:
         pass
 
@@ -265,13 +273,13 @@ def main():
         print(f"\n[SUCCESS] {stdout}")
         job_id = stdout.split()[-1]
         print(f"Job is queued on partition 'small'.")
-        print(f"Working directory on scratch : {run_dir}")
-        print(f"Symlink created in repo      : ./latest_run -> {run_dir}")
+        print(f"All files isolated to scratch: {run_dir}")
         print(f"Check status with            : squeue -j {job_id}")
         print(f"Inspect stdout               : cat {run_dir}/lumi_iq_{job_id}.out")
-        print(f"  (or via symlink)           : cat latest_run/lumi_iq_{job_id}.out")
         print(f"Inspect stderr               : cat {run_dir}/lumi_iq_{job_id}.err")
-        print(f"Results file (when done)     : {run_dir}/results.json")
+        print(f"Results JSON (when done)     : {run_dir}/results.json")
+        print(f"Scratch latest run symlink   : {scratch_latest}")
+        print(f"  (e.g.: cat {scratch_latest}/lumi_iq_{job_id}.out)")
     else:
         print(f"\n[ERROR] Slurm submission failed:")
         print(res.stderr)
