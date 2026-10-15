@@ -21,6 +21,34 @@ It provides an end-to-end operational pipeline connecting the **LUMI supercomput
 
 ---
 
+## Quick Start for New Users (3 Steps to First Execution)
+
+### 1. One-time Setup on LUMI login node (`uan`):
+Containerize dependencies into a SquashFS image (Tykky) and register Lmod module:
+```bash
+cd ~/lumi-iq/WP2/Task_2.1-Initial_Software_Stack
+bash build_tykky_module.sh
+bash setup_lumi_module.sh
+```
+
+### 2. Activate environment:
+```bash
+module use $HOME/modulefiles
+module load lumi-iq
+```
+*(Loaded automatically in subsequent sessions via `~/.bashrc`)*
+
+### 3. Run your first quantum calculation on VLQ via Slurm:
+```bash
+python submit_job.py
+```
+- On first launch, follow the terminal URL to log in via browser (OAuth 2.0 Device Flow).
+- The token is securely saved to `~/.lumi-iq/token` (`chmod 600`).
+- The job is queued in Slurm (`project_462001789`), bounded by token validity (`--deadline`).
+- All outputs are stored cleanly on `$SCRATCH`. Subsequent runs need no browser interaction!
+
+---
+
 ## 1. Interactive Execution on LUMI Open OnDemand (JupyterLab)
 
 1. Navigate to **[www.lumi.csc.fi](https://www.lumi.csc.fi)** and select **Interactive Apps -> Jupyter**.
