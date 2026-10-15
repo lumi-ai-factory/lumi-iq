@@ -17,16 +17,24 @@ echo "=== Building LUMI-IQ Environment using Tykky ==="
 echo "Target directory: $TARGET_DIR"
 echo "Requirements file: $REQUIREMENTS_FILE"
 
-# 1. Load LUMI environment
-module purge
-module load LUMI/24.03
-module load cotainr 2>/dev/null || true
+# 1. Load LUMI container wrapper module (Tykky)
+# On LUMI, pip-containerize is provided by the lumi-container-wrapper module
+if ! command -v pip-containerize &>/dev/null; then
+    module load lumi-container-wrapper 2>/dev/null || module load LUMI lumi-container-wrapper 2>/dev/null || true
+fi
+
+if ! command -v pip-containerize &>/dev/null; then
+    echo "ERROR: pip-containerize command not found."
+    echo "Trying: module spider lumi-container-wrapper"
+    exit 1
+fi
+
+echo "Using pip-containerize: $(which pip-containerize)"
 
 # 2. Run pip-containerize to build containerized environment
-# Note: pip-containerize is LUMI's official Tykky tool
+# Note: --extra-index-url is already specified inside requirements.txt
 pip-containerize new \
     --prefix "$TARGET_DIR" \
-    --extra-index-url "https://opencode.it4i.eu/api/v4/projects/107/packages/pypi/simple" \
     "$REQUIREMENTS_FILE"
 
 echo "=== Tykky Container Built Successfully! ==="
