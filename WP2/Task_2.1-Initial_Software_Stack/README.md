@@ -23,12 +23,12 @@ It provides an end-to-end operational pipeline connecting the **LUMI supercomput
 
 ## Quick Start for New Users (4 Simple Steps)
 
-### Step 1: Clone the repository (on LUMI login node `uan`)
+### Step 1: Clone the repository and checkout branch (on LUMI login node `uan`)
 ```bash
-git clone https://opencode.it4i.eu/qclab/lumi-iq.git
+git clone -b task-2.1-initial-software-stack https://opencode.it4i.eu/qclab/lumi-iq.git
 cd lumi-iq/WP2/Task_2.1-Initial_Software_Stack
-git checkout task-2.1-initial-software-stack
 ```
+*(Or if already cloned: `cd lumi-iq && git checkout task-2.1-initial-software-stack && cd WP2/Task_2.1-Initial_Software_Stack`)*
 
 ### Step 2: Build software environment (One-time Setup, ~2-3 min)
 Containerize dependencies into a SquashFS image via LUMI Tykky and register Lmod module:
