@@ -42,22 +42,39 @@ It provides an end-to-end operational pipeline connecting the **LUMI supercomput
 
 ## 2. Non-Interactive Batch Execution on LUMI (Slurm)
 
-To run unattended batch jobs without browser prompts:
+To run unattended batch jobs without browser prompts while preventing token expiration in the queue:
 
-1. Store your Personal Access Token (PAT) securely (chmod 600):
-   ```bash
-   mkdir -p ~/.lumi-iq
-   echo "<YOUR_LEXIS_PAT_TOKEN>" > ~/.lumi-iq/pat.token
-   chmod 600 ~/.lumi-iq/pat.token
-   ```
+### Automated Queue-Aware Submission (Recommended)
+Use `submit_job.py` to authenticate, persist credentials with `chmod 600`, and dynamically enforce both execution walltime (`--time`) and Slurm queue deadline (`--deadline`):
 
-2. Submit the Slurm batch job:
-   ```bash
-   sbatch submit_lumi.sbatch
-   ```
+```bash
+cd WP2/Task_2.1-Initial_Software_Stack
 
-3. Monitor job execution:
-   ```bash
-   squeue --me
-   cat lumi_iq_*.out
-   ```
+# Submit job with default 5-minute walltime and 60s safety margin:
+python submit_job.py
+
+# Or specify custom walltime:
+python submit_job.py --walltime 00:10:00 --margin 120
+```
+
+`submit_job.py` automatically:
+1. Validates or obtains the OAuth token, saving it to `~/.lumi-iq/token` and `~/.lumi-iq/refresh_token` (`chmod 600`).
+2. Calculates exact token expiration timestamp and sets `--deadline` in Slurm.
+3. Enforces the invariant:
+   $$\text{Queue Wait Time} + \text{Execution Walltime} \le \text{Token Validity} - \text{Safety Margin}$$
+   If the job waits too long in the Slurm queue and cannot complete before token expiration, Slurm automatically cancels it (`DEADLINE`) rather than dispatching it with expired credentials.
+4. If the token approaches expiry, it automatically attempts non-interactive renewal using the saved refresh token.
+
+### Manual Submission
+Alternatively, submit directly via `sbatch` using the saved token:
+
+```bash
+sbatch submit_lumi.sbatch
+```
+
+### Monitoring Jobs
+```bash
+squeue --me
+scontrol show job <JOB_ID> | grep -E "(JobState|Deadline|TimeLimit)"
+cat lumi_iq_<JOB_ID>.out
+```

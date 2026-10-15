@@ -10,9 +10,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=8
-#SBATCH --mem=16G
-#SBATCH --time=00:15:00                    # Set dynamically < token validity by submit_job.py
-#SBATCH --output=lumi_iq_%j.out
+#SBATCH --time=00:05:00                    # Default execution walltime; overridden by submit_job.py with --deadline
 #SBATCH --error=lumi_iq_%j.err
 
 echo "=== Starting LUMI-IQ Hybrid Job on LUMI ==="
