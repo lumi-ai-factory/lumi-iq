@@ -1,4 +1,31 @@
 import os
+import atexit
+
+# Clean shutdown handler for Py4HEAppE ThreadPool teardown at Python exit
+try:
+    from py4heappe.heappe_v6.core.api_client import ApiClient
+    _active_heappe_clients = []
+    _orig_heappe_init = ApiClient.__init__
+
+    def _hooked_heappe_init(self, *args, **kwargs):
+        _orig_heappe_init(self, *args, **kwargs)
+        _active_heappe_clients.append(self)
+
+    ApiClient.__init__ = _hooked_heappe_init
+    ApiClient.__del__ = lambda self: None
+
+    def _cleanup_heappe_pools():
+        for client in _active_heappe_clients:
+            try:
+                client.pool.close()
+                client.pool.terminate()
+            except Exception:
+                pass
+
+    atexit.register(_cleanup_heappe_pools)
+except Exception:
+    pass
+
 from qiskit import QuantumCircuit
 from qaas.client import QProvider
 
