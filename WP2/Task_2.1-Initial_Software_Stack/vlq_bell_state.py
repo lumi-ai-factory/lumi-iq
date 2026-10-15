@@ -1,5 +1,9 @@
 import os
 import atexit
+import warnings
+
+# Suppress tqdm widget warning in headless/batch execution
+warnings.filterwarnings("ignore", message=".*IProgress not found.*")
 
 # Clean shutdown handler for Py4HEAppE ThreadPool teardown at Python exit
 try:
