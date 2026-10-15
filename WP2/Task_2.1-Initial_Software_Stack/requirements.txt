@@ -2,4 +2,9 @@
 
 ipykernel
 matplotlib
-qaas[iqm_qiskit] @ git+https://github.com/It4innovations/quantum-as-a-service.git@40-integration-of-qscheduler---qheappe-client-v100
+qaas @ git+https://github.com/It4innovations/quantum-as-a-service.git@40-integration-of-qscheduler---qheappe-client-v100
+iqm-client[qiskit]==35.0.*
+iqm-exa-common==28.0.*
+iqm-station-control-client==13.0.*
+iqm-data-definitions==3.0
+iqm-pulla==14.0.*
