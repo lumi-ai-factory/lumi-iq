@@ -21,6 +21,15 @@ echo "Node  : $(hostname)"
 echo "Date  : $(date)"
 echo "WorkDir: $(pwd)"
 
+# 0. Load centralized configuration if available
+if [ -f "./.env" ]; then
+    set -a; source "./.env"; set +a
+elif [ -n "${SLURM_SUBMIT_DIR:-}" ] && [ -f "$SLURM_SUBMIT_DIR/.env" ]; then
+    set -a; source "$SLURM_SUBMIT_DIR/.env"; set +a
+elif [ -f "$HOME/.lumi-iq/config" ]; then
+    set -a; source "$HOME/.lumi-iq/config"; set +a
+fi
+
 # 1. Clean environment and load LUMI software modules quietly (suppressing sticky module noise)
 module --force purge 2>/dev/null || true
 module load LUMI/24.03 2>/dev/null || true

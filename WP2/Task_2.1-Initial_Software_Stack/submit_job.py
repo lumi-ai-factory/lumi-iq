@@ -29,8 +29,9 @@ import jwt
 
 TOKEN_DIR = os.path.expanduser("~/.lumi-iq")
 TOKEN_FILE = os.path.join(TOKEN_DIR, "token")
-REFRESH_FILE = os.path.join(TOKEN_DIR, "refresh_token")
-PROJECT = os.getenv("LEXIS_PROJECT", "vlq_demo_project")
+
+from config import LUMI_PROJECT, LEXIS_PROJECT, LEXIS_RESOURCE
+PROJECT = LEXIS_PROJECT
 
 
 def get_token_validity(token_str: str) -> tuple[int, int]:
@@ -53,42 +54,14 @@ def save_secure_file(path: str, content: str):
     os.chmod(path, 0o600)
 
 
-def try_refresh_token() -> tuple[str | None, int, int]:
-    """Attempts non-interactive token renewal via saved refresh token."""
-    if not os.path.exists(REFRESH_FILE):
-        return None, 0, 0
-    try:
-        with open(REFRESH_FILE, "r") as f:
-            rf = f.read().strip()
-        if not rf:
-            return None, 0, 0
-        from py4lexis.session import LexisSessionToken
-
-        print("Attempting non-interactive renewal using saved refresh token...")
-        session = LexisSessionToken(refresh_token=rf, suppress_print=True)
-        new_access = session.get_access_token()
-        new_rf = session.get_refresh_token()
-
-        save_secure_file(TOKEN_FILE, new_access)
-        if new_rf:
-            save_secure_file(REFRESH_FILE, new_rf)
-
-        exp, rem = get_token_validity(new_access)
-        print(f"Token refreshed successfully! Valid for {rem}s ({rem // 60}m {rem % 60}s).")
-        return new_access, exp, rem
-    except Exception as e:
-        print(f"Notice: Could not refresh token: {e}")
-        return None, 0, 0
-
-
 def obtain_or_load_token(min_required_sec: int) -> tuple[str, int, int]:
     """
-    Loads existing token or initiates authentication.
+    Loads existing token or initiates fresh Device Code Flow authentication.
     Ensures remaining lifetime is at least min_required_sec.
     """
     token = os.getenv("LEXIS_TOKEN")
 
-    # 1. Try reading existing access token
+    # 1. Try reading existing access token from ~/.lumi-iq/token
     if not token and os.path.exists(TOKEN_FILE):
         try:
             with open(TOKEN_FILE, "r") as f:
@@ -99,16 +72,12 @@ def obtain_or_load_token(min_required_sec: int) -> tuple[str, int, int]:
                 print(f"Token is valid for: {rem}s ({rem // 60}m {rem % 60}s).")
                 return candidate, exp, rem
             else:
-                print(f"Saved token has only {rem}s remaining (need >= {min_required_sec}s).")
+                print(f"Saved token has expired or has only {rem}s remaining (need >= {min_required_sec}s).")
+                print("Initiating re-authentication...")
         except Exception as e:
             print(f"Notice: Could not read {TOKEN_FILE}: {e}")
 
-    # 2. Try refreshing via refresh_token
-    refreshed_token, exp, rem = try_refresh_token()
-    if refreshed_token and rem >= min_required_sec:
-        return refreshed_token, exp, rem
-
-    # 3. Interactive OAuth 2.0 Device Code Flow
+    # 2. Interactive OAuth 2.0 Device Code Flow (fresh re-auth)
     print("\n=== Initiating LEXIS Authentication (OAuth Device Code Flow) ===")
     from qaas.client import QProvider
 
@@ -120,16 +89,7 @@ def obtain_or_load_token(min_required_sec: int) -> tuple[str, int, int]:
         sys.exit(1)
 
     save_secure_file(TOKEN_FILE, token)
-    print(f"Access token securely saved to {TOKEN_FILE} (permissions: 0600).")
-
-    if hasattr(provider, "_session") and provider._session:
-        try:
-            rf = provider._session.get_refresh_token()
-            if rf:
-                save_secure_file(REFRESH_FILE, rf)
-                print(f"Refresh token securely saved to {REFRESH_FILE} (permissions: 0600).")
-        except Exception:
-            pass
+    print(f"Fresh token securely saved to {TOKEN_FILE} (permissions: 0600).")
 
     exp, rem = get_token_validity(token)
     return token, exp, rem
@@ -173,8 +133,8 @@ def main():
     )
     parser.add_argument(
         "--account",
-        default=os.getenv("LUMI_ACCOUNT", "project_462001789"),
-        help="LUMI Slurm project account (default: project_462001789)",
+        default=LUMI_PROJECT,
+        help=f"LUMI Slurm project account (default: {LUMI_PROJECT})",
     )
     parser.add_argument(
         "--walltime",
@@ -223,8 +183,9 @@ def main():
     run_dir = os.path.join(scratch_base, f"run_{timestamp}")
     os.makedirs(run_dir, exist_ok=True)
 
-    # Copy script into run_dir for reproducibility and direct execution
+    # Copy scripts into run_dir for reproducibility and direct execution
     shutil.copy(os.path.join(script_dir, "vlq_bell_state.py"), run_dir)
+    shutil.copy(os.path.join(script_dir, "config.py"), run_dir)
 
     # Clean up any leftover symlink in repo so git workspace stays 100% clean
     repo_link = os.path.join(script_dir, "latest_run")

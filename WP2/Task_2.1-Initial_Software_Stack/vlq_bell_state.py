@@ -38,7 +38,6 @@ qc.measure_all()
 # 1. Manage LEXIS Token (Environment variable or ~/.lumi-iq/token)
 token_dir = os.path.expanduser("~/.lumi-iq")
 token_file = os.path.join(token_dir, "token")
-refresh_file = os.path.join(token_dir, "refresh_token")
 
 token = None
 candidate = os.getenv("LEXIS_TOKEN")
@@ -64,32 +63,6 @@ if candidate:
     except Exception as e:
         print(f"Notice: Could not decode token: {e}")
 
-# If token is expired or missing, try non-interactive renewal using refresh_token
-if not token and os.path.exists(refresh_file):
-    try:
-        with open(refresh_file, "r") as f:
-            rf = f.read().strip()
-        if rf:
-            print("Attempting non-interactive token renewal via refresh token...")
-            from py4lexis.session import LexisSessionToken
-            session = LexisSessionToken(refresh_token=rf, suppress_print=True)
-            token = session.get_access_token()
-            new_rf = session.get_refresh_token()
-            # Save renewed tokens
-            os.makedirs(token_dir, mode=0o700, exist_ok=True)
-            fd = os.open(token_file, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
-            with open(fd, "w") as f:
-                f.write(token)
-            os.chmod(token_file, 0o600)
-            if new_rf:
-                fd_rf = os.open(refresh_file, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
-                with open(fd_rf, "w") as f:
-                    f.write(new_rf)
-                os.chmod(refresh_file, 0o600)
-            print("Successfully renewed LEXIS access token via refresh token.")
-    except Exception as e:
-        print(f"Notice: Token renewal failed: {e}")
-
 # If still no valid token and running inside a Slurm batch job, abort clearly
 if not token and os.getenv("SLURM_JOB_ID"):
     import sys
@@ -98,14 +71,17 @@ if not token and os.getenv("SLURM_JOB_ID"):
     print("Possible causes:")
     print("  1. The job waited in the Slurm queue longer than token validity.")
     print("  2. Token was not obtained prior to job submission.")
-    print("Remedy: Run 'python submit_job.py' on the login node to re-authenticate.")
+    print("Remedy: Run 'python auth.py' on the login node to re-authenticate.")
     print("=" * 65 + "\n")
     sys.exit(1)
 
-# 2. Instantiate QProvider with your LEXIS project
-# Passing token=None triggers the interactive OAuth Device Code Flow in the browser!
-lexis_project = os.getenv("LEXIS_PROJECT", "vlq_demo_project")
-resource_name = os.getenv("LEXIS_RESOURCE", "VLQ-CZ")
+try:
+    from config import LEXIS_PROJECT, LEXIS_RESOURCE
+    lexis_project = LEXIS_PROJECT
+    resource_name = LEXIS_RESOURCE
+except Exception:
+    lexis_project = os.getenv("LEXIS_PROJECT", "vlq_demo_project")
+    resource_name = os.getenv("LEXIS_RESOURCE", "VLQ-CZ")
 
 print(f"Connecting to LEXIS project: {lexis_project}...")
 provider = QProvider(
@@ -122,15 +98,6 @@ if provider._token:
             f.write(provider._token)
         os.chmod(token_file, 0o600)
         print(f"Token saved securely to {token_file} (permissions: 0600).")
-
-        if hasattr(provider, "_session") and provider._session:
-            rf = provider._session.get_refresh_token()
-            if rf:
-                fd_rf = os.open(refresh_file, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
-                with open(fd_rf, "w") as f:
-                    f.write(rf)
-                os.chmod(refresh_file, 0o600)
-                print(f"Refresh token saved securely to {refresh_file} (permissions: 0600).")
     except Exception as e:
         print(f"Notice: Could not save token: {e}")
 

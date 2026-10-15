@@ -14,8 +14,8 @@ It provides an end-to-end operational pipeline connecting the **LUMI supercomput
 | **[vlq_bell_state.py](vlq_bell_state.py)** | Standalone Python script executable in batch mode via Slurm. |
 | **[requirements.txt](requirements.txt)** | Python dependencies referencing the IT4Innovations private PyPI repository for `qaas[iqm_qiskit]`, `iqm-client`, and Qiskit. |
 | **[build_tykky_module.sh](build_tykky_module.sh)** | Script to containerize the software environment on LUMI using the **Tykky wrapper (`pip-containerize`)**, complying with the LUMI Lustre parallel file system policy. |
-| **[setup_lumi_module.sh](setup_lumi_module.sh)** | Script to generate the official Lmod module (`lumi-iq`) for the containerized environment. |
-| **[refresh_token.py](refresh_token.py)** | Standalone utility to refresh LEXIS OAuth token via refresh token or obtain a new one via Device Flow. |
+| **[auth.py](auth.py)** | Standalone utility to obtain a fresh LEXIS token via OAuth Device Flow. |
+| **[config.py](config.py)** | Centralized configuration loader for LUMI and LEXIS projects. |
 | **[submit_lumi.sbatch](submit_lumi.sbatch)** | Official Slurm batch script template for non-interactive execution on LUMI compute nodes (`project_462001789`). |
 | **[D2.1_Deliverable_Revised_Sections.md](D2.1_Deliverable_Revised_Sections.md)** | Revision document for Deliverable D2.1 addressing all peer-review comments and LUMI policy compliance. |
 | **[.env.example](.env.example)** | Template for local environment variable configuration (no secrets). |
@@ -84,25 +84,45 @@ No Jupyter kernels or kernel registration files are needed. Everything runs dire
 
 ---
 
-## 2. Authentication & Token Renewal (`refresh_token.py`)
+## 2. Centralized Project Configuration (`.env` or `~/.lumi-iq/config`)
 
-To authenticate with LEXIS or renew your credentials independently of Slurm job submission:
+You can change project settings for both **LUMI** and **LEXIS** in one single place:
 
 ```bash
-python refresh_token.py
+# Local configuration (in task directory):
+cp .env.example .env
+
+# Or global configuration across all sessions ($HOME/.lumi-iq/config):
+mkdir -p ~/.lumi-iq
+cp .env.example ~/.lumi-iq/config
 ```
 
-- **If a valid refresh token exists:** Automatically and non-interactively requests a fresh access token from Keycloak.
-- **If no token exists or refresh token has expired:** Automatically launches the interactive OAuth 2.0 Device Code Flow in your browser.
-- **To force a fresh browser login:**
-  ```bash
-  python refresh_token.py --force-new
-  ```
-- Both `token` (access token) and `refresh_token` are saved to `$HOME/.lumi-iq/` with strict `chmod 600` permissions.
+Contents of `.env` / `~/.lumi-iq/config`:
+```bash
+# LUMI Slurm account
+LUMI_PROJECT=project_462001789
+
+# LEXIS Platform project and QPU backend
+LEXIS_PROJECT=vlq_demo_project
+LEXIS_RESOURCE=VLQ-CZ
+```
+All scripts (`submit_job.py`, `auth.py`, `vlq_bell_state.py`, `submit_lumi.sbatch`) automatically read these settings.
 
 ---
 
-## 3. Non-Interactive Batch Execution on LUMI (Slurm)
+## 3. Dedicated Authentication (`auth.py`)
+
+To obtain a fresh token at any time via browser login without submitting a Slurm job:
+
+```bash
+python auth.py
+```
+
+Follow the terminal link to log in (OAuth 2.0 Device Flow). The fresh token is saved to `~/.lumi-iq/token` (`chmod 600`).
+
+---
+
+## 4. Non-Interactive Batch Execution on LUMI (Slurm)
 
 To run unattended batch jobs without browser prompts while preventing token expiration in the queue:
 
