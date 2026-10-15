@@ -37,7 +37,6 @@ local env_root = "$ENV_DIR"
 
 -- Prepend container wrapper bin directory to PATH
 prepend_path("PATH", pathJoin(env_root, "bin"))
-prepend_path("PYTHONPATH", pathJoin(os.getenv("HOME") or "", "lumi-iq/WP2/Task_2.1-Initial_Software_Stack"))
 setenv("LUMI_IQ_ENV", env_root)
 setenv("LUMI_IQ_BACKEND", "VLQ")
 EOF

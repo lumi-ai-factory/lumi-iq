@@ -17,8 +17,12 @@ echo "=== Building LUMI-IQ Environment using Tykky (conda-containerize) ==="
 echo "Target directory: $TARGET_DIR"
 echo "Environment definition: $ENV_FILE"
 
-# 0. Clean PATH and unload module to prevent Tykky build collision
+# 0. Clean environment to prevent Tykky / Miniforge build collision
 module unload lumi-iq 2>/dev/null || true
+unset PYTHONPATH 2>/dev/null || true
+unset PYTHONHOME 2>/dev/null || true
+export CONDA_NO_PLUGINS=true
+
 NEW_PATH=""
 IFS=':' read -ra ADDR <<< "$PATH"
 for p in "${ADDR[@]}"; do
