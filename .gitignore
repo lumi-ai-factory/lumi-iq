@@ -10,6 +10,14 @@ venv/
 env/
 .conda/
 
+# ─── Secrets, credentials & tokens (LUMI & EuroHPC Security Policy) ───
+.env
+*.token
+*.pem
+*.key
+credentials/
+secrets/
+
 # ─── Jupyter ──────────────────────────────────────────────────────────
 .ipynb_checkpoints/
 

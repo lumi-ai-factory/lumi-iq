@@ -1,0 +1,4 @@
+--extra-index-url https://opencode.it4i.eu/api/v4/projects/107/packages/pypi/simple
+
+matplotlib
+qaas[iqm_qiskit] @ git+https://github.com/It4innovations/quantum-as-a-service.git@40-integration-of-qscheduler---qheappe-client-v100
