@@ -21,7 +21,11 @@ echo "Environment definition: $ENV_FILE"
 module unload lumi-iq 2>/dev/null || true
 unset PYTHONPATH 2>/dev/null || true
 unset PYTHONHOME 2>/dev/null || true
-export CONDA_NO_PLUGINS=true
+unset CONDA_NO_PLUGINS 2>/dev/null || true
+export APPTAINERENV_PYTHONPATH=""
+export SINGULARITYENV_PYTHONPATH=""
+export APPTAINERENV_PYTHONHOME=""
+export SINGULARITYENV_PYTHONHOME=""
 
 NEW_PATH=""
 IFS=':' read -ra ADDR <<< "$PATH"
