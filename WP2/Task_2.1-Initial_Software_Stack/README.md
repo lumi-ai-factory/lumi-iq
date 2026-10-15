@@ -35,7 +35,6 @@ cd lumi-iq/WP2/Task_2.1-Initial_Software_Stack
 Containerize dependencies into a SquashFS image via LUMI Tykky and register Lmod module:
 ```bash
 bash build_tykky_module.sh
-bash setup_lumi_module.sh
 ```
 
 ### Step 3: Activate the module

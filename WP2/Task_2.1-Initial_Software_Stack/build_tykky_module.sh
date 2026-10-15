@@ -17,7 +17,28 @@ echo "=== Building LUMI-IQ Environment using Tykky (conda-containerize) ==="
 echo "Target directory: $TARGET_DIR"
 echo "Environment definition: $ENV_FILE"
 
-# 1. Load LUMI container wrapper module (Tykky)
+# 0. Clean PATH and unload module to prevent Tykky build collision
+module unload lumi-iq 2>/dev/null || true
+NEW_PATH=""
+IFS=':' read -ra ADDR <<< "$PATH"
+for p in "${ADDR[@]}"; do
+    if [[ "$p" != *"$TARGET_DIR"* && -n "$p" ]]; then
+        if [ -z "$NEW_PATH" ]; then
+            NEW_PATH="$p"
+        else
+            NEW_PATH="$NEW_PATH:$p"
+        fi
+    fi
+done
+export PATH="$NEW_PATH"
+
+# 1. Clean existing target directory if present for a fresh rebuild
+if [ -d "$TARGET_DIR" ]; then
+    echo "Notice: Removing existing $TARGET_DIR for a clean rebuild..."
+    rm -rf "$TARGET_DIR"
+fi
+
+# 2. Load LUMI container wrapper module (Tykky)
 module load LUMI lumi-container-wrapper 2>/dev/null || module load lumi-container-wrapper 2>/dev/null || true
 
 # Robust fallback to LUMI system path if Lmod hierarchy differs:
@@ -43,5 +64,9 @@ conda-containerize new \
     "$ENV_FILE"
 
 echo "=== Tykky Container Built Successfully! ==="
-echo "Next step: configure the Lmod module:"
-echo "  bash setup_lumi_module.sh"
+
+# 3. Automatically configure Lmod module
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/setup_lumi_module.sh" ]; then
+    bash "$SCRIPT_DIR/setup_lumi_module.sh" "$TARGET_DIR"
+fi
