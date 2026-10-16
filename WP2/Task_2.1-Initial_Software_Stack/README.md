@@ -21,7 +21,6 @@ It provides an end-to-end operational pipeline connecting the **LUMI supercomput
 | **[run_all_tests.sh](run_all_tests.sh)** | Master single-command test suite runner executing all stack checks, QPU connectivity, and all 4 WP2 use cases. |
 | **[run_all_tests.py](run_all_tests.py)** | Underlying Python test orchestrator supporting `--backend SIM|VLQ`, selective test filters, and structured reporting. |
 | **[use_cases/](use_cases/)** | Directory containing the 4 standardized WP2 use cases (Car Manufacturing, Health & Life Science, Terrestrial Network, QML Time Series) adapted for LUMI. |
-| **[D2.1_Deliverable_Revised_Sections.md](D2.1_Deliverable_Revised_Sections.md)** | Revision document for Deliverable D2.1 addressing all peer-review comments and LUMI policy compliance. |
 | **[.env.example](.env.example)** | Template for local environment variable configuration (no secrets). |
 
 ---
