@@ -43,19 +43,57 @@ LEXIS_PROJECT = os.getenv("LEXIS_PROJECT", "vlq_demo_project")
 LEXIS_RESOURCE = os.getenv("LEXIS_RESOURCE", "VLQ-CZ")
 
 
-def get_lexis_token() -> str | None:
-    """Retrieves saved LEXIS OAuth token from env or ~/.lumi-iq/token."""
+def get_token_remaining_seconds(token_str: str) -> int:
+    """Returns remaining lifetime in seconds from JWT exp claim, or 0 if invalid."""
+    try:
+        import time
+        import jwt
+        payload = jwt.decode(token_str, options={"verify_signature": False})
+        exp = payload.get("exp", 0)
+        return exp - int(time.time())
+    except Exception:
+        return 0
+
+
+def get_lexis_token(min_remaining_sec: int = 60) -> str | None:
+    """
+    Retrieves saved LEXIS OAuth token from env or ~/.lumi-iq/token.
+    Validates expiration. If missing, invalid, or remaining lifetime <= min_remaining_sec,
+    returns None so that callers can trigger OAuth Device Flow automatically.
+    """
     token = os.getenv("LEXIS_TOKEN")
     if token:
-        return token
+        rem = get_token_remaining_seconds(token)
+        if rem > min_remaining_sec:
+            return token
+        else:
+            print(f"[NOTICE] $LEXIS_TOKEN is expired or near expiry ({rem}s remaining).")
+
     token_file = os.path.expanduser("~/.lumi-iq/token")
     if os.path.exists(token_file):
         try:
             with open(token_file, "r") as f:
                 content = f.read().strip()
                 if content:
-                    return content
+                    rem = get_token_remaining_seconds(content)
+                    if rem > min_remaining_sec:
+                        return content
+                    else:
+                        print(f"[NOTICE] Cached token in ~/.lumi-iq/token is expired or near expiry ({rem}s remaining).")
         except Exception:
             pass
+
     return None
+
+
+def save_lexis_token(token_str: str, token_path: str = "~/.lumi-iq/token") -> None:
+    """Persists token string to file with strict chmod 0600 permissions."""
+    path = os.path.expanduser(token_path)
+    os.makedirs(os.path.dirname(path), mode=0o700, exist_ok=True)
+    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with open(fd, "w") as f:
+        f.write(token_str.strip())
+    os.chmod(path, 0o600)
+    print(f"Token saved securely to {path} (permissions: 0600).")
+
 

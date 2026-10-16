@@ -37,10 +37,10 @@ def get_backend(name: str) -> Backend:
 
     if name == 'VLQ':
         try:
-            from config import LEXIS_PROJECT, LEXIS_RESOURCE, get_lexis_token
+            from config import LEXIS_PROJECT, LEXIS_RESOURCE, get_lexis_token, save_lexis_token
         except ImportError:
             sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
-            from config import LEXIS_PROJECT, LEXIS_RESOURCE, get_lexis_token
+            from config import LEXIS_PROJECT, LEXIS_RESOURCE, get_lexis_token, save_lexis_token
 
         token = get_lexis_token()
         if token:
@@ -49,6 +49,8 @@ def get_backend(name: str) -> Backend:
         else:
             print(f"No saved token found. Prompting OAuth Device Flow for project '{LEXIS_PROJECT}'...")
             provider = QProvider(lexis_project=LEXIS_PROJECT)
+            if getattr(provider, "_token", None):
+                save_lexis_token(provider._token)
 
         backend: QBackend = provider.get_backend(LEXIS_RESOURCE)
         print(f"Backend '{backend.name}' successfully initialized (target: {LEXIS_RESOURCE}).")

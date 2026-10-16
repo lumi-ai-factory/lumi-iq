@@ -38,13 +38,14 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.abspath(os.path.join(script_dir, "../..")))
 
 try:
-    from config import LEXIS_PROJECT, LEXIS_RESOURCE, get_lexis_token
+    from config import LEXIS_PROJECT, LEXIS_RESOURCE, get_lexis_token, save_lexis_token
     from qaas.client import QProvider
 except ImportError:
     QProvider = None
     LEXIS_PROJECT = "vlq_demo_project"
     LEXIS_RESOURCE = "VLQ-CZ"
     get_lexis_token = lambda: None
+    save_lexis_token = lambda t: None
 
 
 def build_bfdcqo_circuit(h, J, n, p=1, bias=None):
@@ -173,6 +174,8 @@ def main():
         else:
             print(f"Initiating OAuth Device Flow for LEXIS project '{LEXIS_PROJECT}'...")
             provider = QProvider(lexis_project=LEXIS_PROJECT)
+            if getattr(provider, "_token", None):
+                save_lexis_token(provider._token)
 
         backend = provider.get_backend(LEXIS_RESOURCE)
         print(f"Connected to QPU: {backend.name} (target: {LEXIS_RESOURCE})")
