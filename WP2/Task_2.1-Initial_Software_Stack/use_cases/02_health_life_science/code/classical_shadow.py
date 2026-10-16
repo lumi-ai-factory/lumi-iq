@@ -11,6 +11,28 @@ from qiskit.quantum_info import Statevector
 from qiskit.circuit import Instruction
 from qiskit.providers import Backend
 
+
+def is_job_done(job) -> bool:
+    """Helper to check if a quantum job reached terminal state across Qiskit and QaaS backends."""
+    if hasattr(job, "in_final_state"):
+        try:
+            return bool(job.in_final_state())
+        except Exception:
+            pass
+    if hasattr(job, "is_final_state"):
+        try:
+            return bool(job.is_final_state())
+        except Exception:
+            pass
+    if hasattr(job, "status"):
+        try:
+            st = str(job.status()).upper()
+            return any(term in st for term in ["DONE", "COMPLETED", "ERROR", "CANCEL", "FAIL"])
+        except Exception:
+            pass
+    return False
+
+
 # --- Functions ---
 def create_snapshot_circuit(
         n_qubit: int,
@@ -130,12 +152,15 @@ def calculate_snapshots(
         time_taken = 0
 
         if not is_simulation:
-            while not job.is_final_state():
+            while not is_job_done(job):
                 sleep(2)
                 time_taken += 2
                 if time_taken % 30 == 0:
-                    print(f'Job {job.job_id()} is still running after {time_taken} seconds...')
-                    print(f'Job status: {job.status()}')
+                    status_str = job.status() if hasattr(job, "status") else "RUNNING"
+                    print(f'Job {job.job_id()} is still running after {time_taken} seconds... (status: {status_str})')
+                if time_taken > 1800:
+                    print(f'Warning: Job {job.job_id()} exceeded timeout (30m). Calling result().')
+                    break
             
         results = job.result().get_counts()
         # get_counts returns a bare dict instead of a list when only one circuit was run,

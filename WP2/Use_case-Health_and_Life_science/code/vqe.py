@@ -173,6 +173,27 @@ def energies_from_counts(
     return energies
 
 
+def is_job_done(job) -> bool:
+    """Helper to check if a quantum job reached terminal state across Qiskit and QaaS backends."""
+    if hasattr(job, "in_final_state"):
+        try:
+            return bool(job.in_final_state())
+        except Exception:
+            pass
+    if hasattr(job, "is_final_state"):
+        try:
+            return bool(job.is_final_state())
+        except Exception:
+            pass
+    if hasattr(job, "status"):
+        try:
+            st = str(job.status()).upper()
+            return any(term in st for term in ["DONE", "COMPLETED", "ERROR", "CANCEL", "FAIL"])
+        except Exception:
+            pass
+    return False
+
+
 def evaluate_energy(
         parameters: np.ndarray, 
         groups: list[tuple[QuantumCircuit, list[tuple[int, float]]]],
@@ -216,12 +237,15 @@ def evaluate_energy(
 
     time_taken = 0
     if not is_simulation:
-        while not job.is_final_state():
+        while not is_job_done(job):
             sleep(2)
             time_taken += 2
             if time_taken % 30 == 0:
-                print(f'Job {job.job_id()} is still running after {time_taken} seconds...')
-                print(f'Job status: {job.status()}')
+                status_str = job.status() if hasattr(job, "status") else "RUNNING"
+                print(f'Job {job.job_id()} is still running after {time_taken} seconds... (status: {status_str})')
+            if time_taken > 1800:
+                print(f'Warning: Job {job.job_id()} exceeded timeout (30m). Calling result().')
+                break
 
     # Decode the counts of each parameter set separately
     counts_list = job.result().get_counts()
