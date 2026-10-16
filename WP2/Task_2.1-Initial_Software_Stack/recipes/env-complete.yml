@@ -27,8 +27,14 @@ dependencies:
     - qaas==0.5.3
     - torch
     - circuit-knitting-toolbox
+    - qiskit-addon-aqc-tensor
+    - iqm-client[qiskit]
+    - iqm-qaoa
+    - iqm-qubit-selector
+    - iqm-error-reduction-tools
+    - fiqci-ems
+    - qc-parallelizer
     - mqt.predictor
     - pennylane
     - pennylane-qiskit
     - bqskit
-    - qiskit-addon-aqc-tensor
