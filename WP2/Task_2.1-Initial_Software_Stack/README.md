@@ -16,6 +16,7 @@ It provides an end-to-end operational pipeline connecting the **LUMI supercomput
 | **[build_tykky_module.sh](build_tykky_module.sh)** | Script to containerize the software environment on LUMI using the **Tykky wrapper (`pip-containerize`)**, complying with the LUMI Lustre parallel file system policy. |
 | **[setup_lumi_module.sh](setup_lumi_module.sh)** | Script to configure a personal Lmod modulefile (`$HOME/modulefiles/lumi-iq/1.0.lua`). |
 | **[deploy_shared_module.sh](deploy_shared_module.sh)** | Deploys container and modulefiles into the shared project space (`/project/project_462001789/`) for all users. |
+| **[LUMI_MODULE_GUIDE.md](LUMI_MODULE_GUIDE.md)** | Comprehensive guide for module deployment, project-wide sharing, and CSC system-wide integration. |
 | **[auth.py](auth.py)** | Standalone utility to obtain a fresh LEXIS token via OAuth Device Flow. |
 | **[config.py](config.py)** | Centralized configuration loader for LUMI and LEXIS projects. |
 | **[run_all_tests.sh](run_all_tests.sh)** | Master single-command test suite runner executing all stack checks, QPU connectivity, and all 4 WP2 use cases. |

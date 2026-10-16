@@ -12,6 +12,8 @@ set -euo pipefail
 
 TARGET_DIR="${1:-$HOME/lumi-iq-env}"
 ENV_FILE="${2:-env.yml}"
+MODULE_ROOT="${3:-$HOME/modulefiles}"
+IS_SHARED="${4:-false}"
 
 echo "=== Building LUMI-IQ Environment using Tykky (conda-containerize) ==="
 echo "Target directory: $TARGET_DIR"
@@ -76,5 +78,5 @@ echo "=== Tykky Container Built Successfully! ==="
 # 3. Automatically configure Lmod module
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [ -f "$SCRIPT_DIR/setup_lumi_module.sh" ]; then
-    bash "$SCRIPT_DIR/setup_lumi_module.sh" "$TARGET_DIR"
+    bash "$SCRIPT_DIR/setup_lumi_module.sh" "$TARGET_DIR" "$MODULE_ROOT" "$IS_SHARED"
 fi

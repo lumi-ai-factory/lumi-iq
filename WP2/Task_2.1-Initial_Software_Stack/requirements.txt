@@ -13,4 +13,7 @@ qiskit-algorithms
 qiskit-machine-learning
 qiskit-nature
 pyscf
+py4lexis
 qaas==0.5.3
+torch
+circuit-knitting-toolbox
