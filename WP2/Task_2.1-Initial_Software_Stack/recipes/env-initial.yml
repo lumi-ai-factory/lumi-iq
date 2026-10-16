@@ -1,19 +1,10 @@
 # ==============================================================================
 # LUMI-IQ Task 2.1 Recipe: Initial Software Stack (Section 3.4.1 Baseline)
 # Target: Czech National Quantum Computer (VLQ) & LUMI HPC
-# Includes all 12 tools specified in Deliverable D2.1 Table 13:
-#   - Qiskit IQM (iqm-client[qiskit])
-#   - IQM QAOA (iqm-qaoa)
-#   - Qiskit Aer (qiskit-aer)
-#   - IQM Qubit Selector (iqm-qubit-selector)
-#   - IQM Error Reduction Tools (iqm-error-reduction-tools)
-#   - FiQCI-EMS (fiqci-ems)
-#   - Qiskit AQC-Tensor Addon (qiskit-addon-aqc-tensor)
-#   - QCut (circuit-knitting-toolbox)
-#   - qc-parallelizer (qc-parallelizer)
-#   - PyTorch (torch)
-#   - scikit-learn
-#   - SciPy
+#
+# Fully compatible with QaaS 0.5.3 (IQM Client 34.0.* for IT4I VLQ QPU).
+# Advanced external IQM libraries requiring IQM Client >=35 are staged in
+# recipes/env-later-additions.yml in accordance with Deliverable Section 3.4.2.
 # ==============================================================================
 name: lumi-iq-env
 channels:
@@ -41,9 +32,4 @@ dependencies:
     - torch
     - circuit-knitting-toolbox
     - qiskit-addon-aqc-tensor
-    - iqm-client[qiskit]
-    - iqm-qaoa
-    - iqm-qubit-selector
-    - iqm-error-reduction-tools
-    - fiqci-ems
     - qc-parallelizer

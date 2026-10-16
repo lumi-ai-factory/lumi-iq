@@ -1,6 +1,6 @@
 # ==============================================================================
 # LUMI-IQ Task 2.1 Recipe: Later Additions & Advanced AI Tools (Section 3.4.2)
-# Target: MQT Predictor, PennyLane-IQM, BQSKit, and Qiskit Addons
+# Target: MQT Predictor, PennyLane, BQSKit, and Newer IQM Addons (IQM Client >=35)
 # ==============================================================================
 name: lumi-iq-advanced
 channels:
@@ -15,9 +15,13 @@ dependencies:
   - pip:
     - --extra-index-url https://opencode.it4i.eu/api/v4/projects/107/packages/pypi/simple
     - py4lexis
-    - qaas==0.5.3
     - mqt.predictor
     - pennylane
     - pennylane-qiskit
     - bqskit
     - qiskit-addon-aqc-tensor
+    - iqm-client[qiskit]
+    - iqm-qaoa
+    - iqm-qubit-selector
+    - iqm-error-reduction-tools
+    - fiqci-ems
