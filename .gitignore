@@ -10,6 +10,14 @@ venv/
 env/
 .conda/
 
+# ─── Secrets, credentials & tokens (LUMI & EuroHPC Security Policy) ───
+.env
+*.token
+*.pem
+*.key
+credentials/
+secrets/
+
 # ─── Jupyter ──────────────────────────────────────────────────────────
 .ipynb_checkpoints/
 
@@ -36,6 +44,8 @@ desktop.ini
 # The reference outputs that D2.3 lists as delivered are re-included below.
 *.log
 *.out
+*.err
+latest_run
 
 # ─── Delivered reference outputs (keep) ───────────────────────────────
 # Named in D2.3 or referenced from a use-case README. Do not remove these
