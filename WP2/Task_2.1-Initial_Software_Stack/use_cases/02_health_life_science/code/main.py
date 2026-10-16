@@ -78,11 +78,11 @@ def run_workflow(
         basis: str,
         spin: int,
         ao_labels: list[str],
-        backend: Backend,
-        optimization_level: Literal[0, 1, 2, 3],
-        shots: int,
-        N: int,
-        K: int,
+        backend: Backend | str | None = None,
+        optimization_level: Literal[0, 1, 2, 3] = 1,
+        shots: int = 256,
+        N: int = 100,
+        K: int = 10,
         threshold: float = 0.2,
         learning_rate: float | None = None,
         perturbation: float | None = None,
@@ -93,7 +93,9 @@ def run_workflow(
         max_iters: int = 40,
         run_vqe_stage: bool = True,
         optimal_params: np.ndarray | None = None,
-        is_simulation: bool = False
+        is_simulation: bool | None = None,
+        backend_name: str | None = None,
+        **kwargs
         ) -> float:
     '''
     Runs the full hybrid quantum-classical workflow to estimate the ground state
@@ -103,8 +105,8 @@ def run_workflow(
         basis: Basis set name
         spin: Number of unpaired electrons. Zero for closed-shell, positive integer for open-shell
         ao_labels: List of atomic orbital labels for AVAS active space selection
-        backend: The backend to run the quantum circuits on
-        optimization_level: The transpilation optimization level, options are 0-3
+        backend: The backend to run the quantum circuits on (Backend instance or string 'VLQ' / 'SIM')
+        optimization_level: The transpilation optimization level, options are 0-3 (default: 1)
         shots: The number of shots for each circuit evaluation
         N: The number of classical shadow snapshots to collect
         K: The number of groups for the median-of-means estimator
@@ -126,13 +128,22 @@ def run_workflow(
             run on the quantum backend. Default is True.
         optimal_params: The ansatz parameters to build the ground state circuit from.
             Required when run_vqe_stage is False, ignored otherwise. Default is None.
-        is_simulation: If True, jobs are not polled for their status, because a local
-            simulator has finished by the time its result is asked for and its jobs do
-            not have the polling interface that remote backend jobs have. Set it for the
-            SIM backend. Default is False.
+        is_simulation: If True, jobs are not polled for their status.
+        backend_name: Alternative alias for backend (supports 'VLQ' or 'SIM').
     Returns:
         energy_estimate: The estimated ground state energy in Hartree units
     '''
+    # Resolve backend string or alias
+    if backend is None and backend_name is not None:
+        backend = backend_name
+    if isinstance(backend, str):
+        backend_name_str = backend
+        backend = get_backend(backend_name_str)
+        if is_simulation is None:
+            is_simulation = (backend_name_str == 'SIM')
+    elif is_simulation is None:
+        is_simulation = False
+
     # Validate inputs
     if optimization_level not in range(4):
         raise ValueError('optimization_level must be 0, 1, 2, or 3')

@@ -85,7 +85,8 @@ def main():
             spin=0,
             ao_labels=["H 1s"],
             threshold=0.2,
-            backend_name=args.backend,
+            backend=args.backend,
+            optimization_level=1,
             max_iters=args.max_iters,
             shots=args.shots,
             trajectory_file=trajectory_file,
@@ -94,9 +95,6 @@ def main():
             K=10,
             max_circuits_per_job=50,
             report_per_job_progress=True,
-            shadow_only=False,
-            parameters_file=None,
-            parameters_row=-1,
         )
     except Exception as e:
         print(f"\nWorkflow note: {e}")
