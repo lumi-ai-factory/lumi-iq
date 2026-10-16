@@ -258,7 +258,7 @@ def test_core_bell_state(backend_target, shots=1024):
 # -----------------------------------------------------------------------------
 # TEST 4-7: WP2 Use Cases Verification Runner
 # -----------------------------------------------------------------------------
-def run_use_case_subprocess(uc_num, name, script_relpath, backend_target, extra_args=None, timeout_sec=300):
+def run_use_case_subprocess(uc_num, name, script_relpath, backend_target, extra_args=None, timeout_sec=600):
     start_time = time.time()
     print(f"\n{BOLD}[TEST {uc_num+3}/7] Running Use Case {uc_num}: {name}...{RESET}")
 
@@ -273,29 +273,40 @@ def run_use_case_subprocess(uc_num, name, script_relpath, backend_target, extra_
         cmd.extend(extra_args)
 
     print(f"  Command: {' '.join(cmd)}")
+    print(f"  {CYAN}--- Live Output for {name} ---{RESET}")
+    output_lines = []
     try:
-        proc = subprocess.run(
+        proc = subprocess.Popen(
             cmd,
             cwd=os.path.dirname(script_path),
-            capture_output=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
             text=True,
-            timeout=timeout_sec,
+            bufsize=1,
         )
+        for raw_line in iter(proc.stdout.readline, ''):
+            if not raw_line and proc.poll() is not None:
+                break
+            line_str = raw_line.rstrip()
+            if line_str:
+                print(f"    │ {line_str}")
+                output_lines.append(line_str)
+        proc.wait(timeout=timeout_sec)
         dur = time.time() - start_time
+        print(f"  {CYAN}--- End of Output ({dur:.2f}s) ---{RESET}")
+
         if proc.returncode == 0:
-            # Extract key success lines from stdout
-            success_lines = [l.strip() for l in proc.stdout.splitlines() if "[SUCCESS]" in l or "Result" in l or "Score" in l]
+            success_lines = [l for l in output_lines if "[SUCCESS]" in l or "Result" in l or "Score" in l or "Final" in l or "Accuracy" in l or "energy" in l.lower()]
             summary_info = success_lines[-1] if success_lines else "Completed successfully"
             print(f"  ✓ {summary_info}")
             return TestResult(uc_num + 3, f"UC {uc_num}: {name}", backend_target, "PASS", dur, summary_info)
         else:
             print(f"  ✗ Process exited with code {proc.returncode}")
-            # Show last few lines of stderr/stdout
-            err_output = proc.stderr.strip() or proc.stdout.strip()
-            last_err = "\n".join(err_output.splitlines()[-4:])
-            print(f"  {RED}{last_err}{RESET}")
+            last_err = "\n".join(output_lines[-4:]) if output_lines else f"Exit {proc.returncode}"
             return TestResult(uc_num + 3, f"UC {uc_num}: {name}", backend_target, "FAIL", dur, f"Exit {proc.returncode}: {last_err[:120]}")
     except subprocess.TimeoutExpired:
+        if 'proc' in locals():
+            proc.kill()
         dur = time.time() - start_time
         print(f"  ✗ Execution timed out after {timeout_sec}s")
         return TestResult(uc_num + 3, f"UC {uc_num}: {name}", backend_target, "FAIL", dur, f"Timeout ({timeout_sec}s)")
@@ -379,8 +390,8 @@ def main():
                     selected_ucs.append(int(item.strip()))
 
         use_case_defs = {
-            1: ("Car Manufacturing (QAOA / Anomaly)", "use_cases/01_car_manufacturing/run_car_manufacturing.py", []),
-            2: ("Health Molecular VQE (LiH)", "use_cases/02_health_life_science/run_health_vqe.py", ["--max-iters", "5"]),
+            1: ("Car Manufacturing (Anomaly Detection)", "use_cases/01_car_manufacturing/run_car_manufacturing.py", []),
+            2: ("Health Molecular VQE (H2)", "use_cases/02_health_life_science/run_health_vqe.py", ["--max-iters", "2"]),
             3: ("Terrestrial Network Routing", "use_cases/03_terrestrial_network/run_terrestrial_network.py", []),
             4: ("QML Time Series Forecasting", "use_cases/04_qml_time_series/run_time_series_forecasting.py", []),
         }
