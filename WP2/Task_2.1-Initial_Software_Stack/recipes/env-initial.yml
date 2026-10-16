@@ -2,9 +2,9 @@
 # LUMI-IQ Task 2.1 Recipe: Initial Software Stack (Section 3.4.1 Baseline)
 # Target: Czech National Quantum Computer (VLQ) & LUMI HPC
 #
-# Fully compatible with QaaS 0.5.3 (IQM Client 34.0.* for IT4I VLQ QPU).
-# Advanced external IQM libraries requiring IQM Client >=35 are staged in
-# recipes/env-later-additions.yml in accordance with Deliverable Section 3.4.2.
+# Verified Qiskit 2.x & QaaS 0.5.3 production stack for LUMI.
+# Note: circuit-knitting-toolbox (QCut) currently requires Qiskit <2.0 and is
+# provided in recipes/env-circuit-knitting.yml / env-later-additions.yml.
 # ==============================================================================
 name: lumi-iq-env
 channels:
@@ -30,6 +30,5 @@ dependencies:
     - py4lexis
     - qaas==0.5.3
     - torch
-    - circuit-knitting-toolbox
     - qiskit-addon-aqc-tensor
     - qc-parallelizer
