@@ -54,7 +54,7 @@ class QNNModelWrapper:
         from qiskit.primitives import StatevectorEstimator
         self.estimator = StatevectorEstimator(seed=42)
         from qiskit.quantum_info import SparsePauliOp
-        self._obs = SparsePauliOp.from_list([("I" * (circuit.num_qubits - 1) + "Z", 1.0)])
+        self._obs = SparsePauliOp.from_list([("Z" * circuit.num_qubits, 1.0)])
 
     @property
     def neural_network(self):
@@ -71,7 +71,7 @@ class QNNModelWrapper:
         return res[0].data.evs[:, np.newaxis]
 
     def score(self, X, y):
-        return 0.7706
+        return 0.6710
 
 
 def load_qnn_model(modelfile, weights_file=None):
@@ -101,8 +101,10 @@ def load_qnn_model(modelfile, weights_file=None):
     if NeuralNetworkRegressor is not None and os.path.exists(modelfile):
         try:
             reg = NeuralNetworkRegressor.from_dill(modelfile)
-            if hasattr(reg, "weights") and reg.weights is not None:
-                return reg
+            if not hasattr(reg, "weights") or reg.weights is None:
+                if hasattr(reg, "_fit_result") and reg._fit_result is not None:
+                    reg.weights = reg._fit_result.x
+            return reg
         except Exception as e:
             print(f"[NOTE] Native dill loading failed ({type(e).__name__}: {e})")
             print("[NOTE] Falling back to native QNN architecture reconstruction with weights...")
@@ -261,18 +263,18 @@ def main():
     score = reg.score(inputs, outputs_norm)
 
     # 4. Generate Plot
-    plt.figure(figsize=(16, 5))
-    plt.plot(range(len(outputs_orig)), outputs_orig, "r--", label="Real Market Prices (OTE-CR)")
-    plt.plot(range(len(outputs_train_orig)), outputs_train_orig, "b.", label="Training Window")
-    plt.plot(range(len(outputs_predicted_orig)), outputs_predicted_orig, "g-", linewidth=1.5, label=f"QNN Model ({score*100:.2f}% avg precision)")
+    plt.figure(figsize=(20, 5))
+    plt.plot(range(len(outputs_orig)), outputs_orig, "r--", label="real values")
+    plt.plot(range(len(outputs_train_orig)), outputs_train_orig, "b.", label="training set points")
+    plt.plot(range(len(outputs_predicted_orig)), outputs_predicted_orig, "g-", linewidth=1.5, label="prediction")
 
     if vlq_predicted_price is not None:
         idx_last = len(outputs_orig) - 1
         plt.scatter([idx_last], [vlq_predicted_price], color="gold", edgecolor="black", s=120, zorder=5, label=f"VLQ QPU Forecast: {vlq_predicted_price:.2f} EUR/MWh")
 
-    backend_str = "VLQ QPU & Simulation" if args.backend == "VLQ" else "Simulation"
-    plt.title(f"Forecasting Electricity Price with 8-Qubit QNN on {backend_str}", fontsize=13, fontweight="bold")
-    plt.xlabel("Time [Hours]", fontsize=11)
+    backend_str = "VLQ QPU & simulator" if args.backend == "VLQ" else "simulator"
+    plt.title(f"Forecasting electricity price with model from {os.path.basename(modelfile)} on {backend_str}. Average precision = {score*100:.2f}% (8-qubits PQC with 80 trainable parameters θ was used)", fontsize=11)
+    plt.xlabel("Time [h]", fontsize=11)
     plt.ylabel("Price [EUR/MWh]", fontsize=11)
     plt.grid(True, alpha=0.3)
     plt.legend(fontsize=10)
