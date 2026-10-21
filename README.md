@@ -16,10 +16,22 @@ lumi-iq/
 ├── modules/                                     # Unified LUMI module packaging & deployment
 │   ├── README.md                                # Comprehensive module deployment guide
 │   ├── modulefiles/                             # Lmod Lua environment definitions
-│   │   ├── Lumi-IQ-qaas/VLQ.lua                 # Primary environment module
-│   │   ├── Lumi-IQ-core/vlq.lua                 # Core quantum execution stack
-│   │   ├── Lumi-IQ-qml/vlq.lua                  # Quantum Machine Learning stack
-│   │   └── Lumi-IQ-ems/vlq.lua                  # Error mitigation & classical shadows stack
+│   │   ├── Lumi-IQ-qaas/
+│   │   │   ├── VLQ.lua                          # Primary environment module (physical QPU target)
+│   │   │   ├── SIM.lua                          # Simulation module (local CPU/GPU target)
+│   │   │   └── default -> VLQ.lua
+│   │   ├── Lumi-IQ-core/
+│   │   │   ├── vlq.lua                          # Core Qiskit & QaaS stack (VLQ QPU target)
+│   │   │   ├── sim.lua                          # Core Qiskit & QaaS stack (Simulator target)
+│   │   │   └── default -> vlq.lua
+│   │   ├── Lumi-IQ-qml/
+│   │   │   ├── vlq.lua                          # Quantum ML & AI stack (VLQ QPU target)
+│   │   │   ├── sim.lua                          # Quantum ML & AI stack (Simulator target)
+│   │   │   └── default -> vlq.lua
+│   │   └── Lumi-IQ-ems/
+│   │       ├── vlq.lua                          # Error mitigation & Classical Shadows (VLQ target)
+│   │       ├── sim.lua                          # Error mitigation & Classical Shadows (Simulator target)
+│   │       └── default -> vlq.lua
 │   ├── recipes/                                 # Pinned Conda/Pip environment recipes
 │   │   ├── env-initial.yml                      # Baseline software stack
 │   │   ├── env-later-additions.yml              # Future roadmap extensions
@@ -70,16 +82,42 @@ On LUMI, central applications follow a two-tier model:
 ## Quickstart for Users on LUMI
 
 ### 1. Loading the Module (CLI & Slurm Batch Jobs)
+
+The LUMI-IQ module tree provides **dual execution targets** via Lmod:
+
 ```bash
 # Add LUMI-IQ central modulepath:
 module use /appl/local/lumiiq/modulefiles
 
-# Load the environment:
-module load Lumi-IQ-qaas/VLQ
+# -----------------------------------------------------------------------------
+# Target 1: Local High-Performance Simulation (CPU/GPU)
+# -----------------------------------------------------------------------------
+# Ideal for rapid local development, prototyping, algorithmic benchmarking, and CI.
+# - Runs accelerated statevector / MPS simulation directly on LUMI compute nodes
+# - Requires NO external network connection, tokens, or credentials
+# - Automatically configures LUMI_IQ_BACKEND="SIM" for CLI runners
+module load Lumi-IQ-qaas/SIM
 
-# Verify active environment:
+# -----------------------------------------------------------------------------
+# Target 2: Physical Quantum Hardware Offload (IT4I VLQ 24-Qubit QPU)
+# -----------------------------------------------------------------------------
+# Dispatches compiled circuits to the physical 24-qubit Star-topology QPU.
+# - Offloads jobs over secure WAN via QaaS, LEXIS AAI, and QScheduler
+# - Requires active LEXIS authentication token (run `python auth.py` once)
+# - Automatically configures LUMI_IQ_BACKEND="VLQ" for CLI runners
+module load Lumi-IQ-qaas/VLQ
+```
+
+#### Specialized Sub-Modules:
+In addition to the primary all-in-one `Lumi-IQ-qaas` module, domain-specific modulefiles are available:
+* **Core Quantum Stack:** `module load Lumi-IQ-core/sim` (Simulation) or `module load Lumi-IQ-core/vlq` (Hardware)
+* **Quantum Machine Learning:** `module load Lumi-IQ-qml/sim` (Simulation) or `module load Lumi-IQ-qml/vlq` (Hardware)
+* **Error Mitigation & Chemistry:** `module load Lumi-IQ-ems/sim` (Simulation) or `module load Lumi-IQ-ems/vlq` (Hardware)
+
+#### Verifying Environment:
+```bash
 which python
-python -c "import qiskit, qaas, py4lexis; print('LUMI-IQ environment ready!')"
+python -c "import qiskit, qiskit_aer, qaas, py4lexis, pyscf, torch; print('LUMI-IQ environment ready!')"
 ```
 
 To make the module permanently available in every login shell:
@@ -91,32 +129,47 @@ echo "module use /appl/local/lumiiq/modulefiles" >> ~/.bashrc
 1. Log into **[www.lumi.csc.fi](https://www.lumi.csc.fi)** &rarr; **Interactive Apps** &rarr; **Jupyter**.
 2. Select partition, time limit, and your LUMI project account.
 3. Under **Settings** &rarr; **Advanced**, switch **Custom Python type** to `Script`.
-4. In **Script or path to script**, insert:
+4. In **Script or path to script**, insert either target:
    ```bash
    module use /appl/local/lumiiq/modulefiles
-   module load Lumi-IQ-qaas/VLQ
+   # For local simulation (no credentials needed):
+   module load Lumi-IQ-qaas/SIM
+
+   # Or for physical QPU hardware access:
+   # module load Lumi-IQ-qaas/VLQ
    ```
 5. Click **Launch**. The **Python 3.12 (LUMI-IQ Hybrid QC)** kernel is pre-configured and immediately available in the notebook launcher.
 
 ### 3. Submitting Hybrid Batch Jobs to Slurm (`submit_job.py`)
-Workloads must run on compute nodes in compliance with LUMI policies. The `submit_job.py` wrapper provides automated queue-aware token expiration enforcement:
+Workloads must run on compute nodes in compliance with LUMI policies. The `submit_job.py` wrapper provides automated queue-aware token expiration enforcement and scratch-space execution:
 
 ```bash
 cd WP2/Task_2.1-Initial_Software_Stack
 
-# Submit Use Case 4 (Electricity Price Forecasting) with real VLQ QPU offload:
+# --- Simulation Mode (runs immediately on compute node, no tokens required) ---
+# Submit Use Case 4 (Electricity Price Forecasting) via local Qiskit Aer simulation:
+python submit_job.py --use-case 4 --backend SIM
+
+# Submit Use Case 2 (Health & Life Science VQE) on Simulator:
+python submit_job.py --use-case 2 --backend SIM
+
+# Run the complete test suite across all 4 use cases on compute node (Simulator):
+python submit_job.py --use-case all --backend SIM
+
+# --- Physical Hardware Mode (offloads circuits to 24-qubit Star VLQ QPU via LEXIS) ---
+# Submit Use Case 4 with physical VLQ QPU offload:
 python submit_job.py --use-case 4 --backend VLQ
 
-# Submit Use Case 2 (Health & Life Science VQE):
+# Submit Use Case 2 (Health & Life Science VQE) with VLQ QPU offload:
 python submit_job.py --use-case 2 --backend VLQ
 
-# Submit Use Case 1 (Car Manufacturing Anomaly Detection):
+# Submit Use Case 1 (Car Manufacturing Anomaly Detection) with VLQ QPU offload:
 python submit_job.py --use-case 1 --backend VLQ
 
-# Submit Use Case 3 (Terrestrial Network QKD Routing):
+# Submit Use Case 3 (Terrestrial Network QKD Routing) with VLQ QPU offload:
 python submit_job.py --use-case 3 --backend VLQ
 
-# Run the complete test suite on compute node:
+# Run the complete test suite on compute node with VLQ QPU offload:
 python submit_job.py --use-case all --backend VLQ
 ```
 

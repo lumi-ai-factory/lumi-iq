@@ -41,10 +41,16 @@ bash build_tykky_module.sh
 
 ### Step 3: Activate the module
 ```bash
-module use $HOME/modulefiles
+# Add modulepath:
+module use /appl/local/lumiiq/modulefiles   # For central system-wide deployment
+# (or: module use $HOME/modulefiles         # For local user sandbox build)
+
+# Option A: Target local high-performance simulation (CPU/GPU, no credentials needed):
+module load Lumi-IQ-qaas/SIM
+
+# Option B: Target physical 24-qubit VLQ QPU (hardware execution):
 module load Lumi-IQ-qaas/VLQ
 ```
-*(This is automatically added to your `~/.bashrc` for future sessions).*
 
 ### Step 4: Run your first quantum computation (Simulator or VLQ)
 You can immediately verify the installation using the local quantum simulator or dispatch to physical hardware:
@@ -74,14 +80,19 @@ Everything runs directly via standard Lmod environment modules:
 
 1. **Load the module**:
    ```bash
-   module use $HOME/modulefiles
+   module use /appl/local/lumiiq/modulefiles
+
+   # Option A: Local high-performance simulation (no credentials needed):
+   module load Lumi-IQ-qaas/SIM
+
+   # Option B: Physical 24-qubit VLQ QPU (hardware execution):
    module load Lumi-IQ-qaas/VLQ
    ```
 
 2. **Verify active Python environment**:
    ```bash
    which python
-   python -c "import qaas, qiskit; print('LUMI-IQ environment ready!')"
+   python -c "import qiskit, qiskit_aer, qaas, py4lexis, pyscf, torch; print('LUMI-IQ environment ready!')"
    ```
 
 3. **Run your scripts or submit jobs**:
@@ -101,6 +112,11 @@ Everything runs directly via standard Lmod environment modules:
 Any authorized user on LUMI can load the pre-built, production-grade module directly:
 ```bash
 module use /appl/local/lumiiq/modulefiles
+
+# Simulation target (CPU/GPU, no credentials required):
+module load Lumi-IQ-qaas/SIM
+
+# Physical VLQ QPU target (hardware execution):
 module load Lumi-IQ-qaas/VLQ
 ```
 
