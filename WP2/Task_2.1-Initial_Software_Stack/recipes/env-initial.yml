@@ -1,0 +1,34 @@
+# ==============================================================================
+# LUMI-IQ Task 2.1 Recipe: Initial Software Stack (Section 3.4.1 Baseline)
+# Target: Czech National Quantum Computer (VLQ) & LUMI HPC
+#
+# Verified Qiskit 2.x & QaaS 0.5.3 production stack for LUMI.
+# Note: circuit-knitting-toolbox (QCut) currently requires Qiskit <2.0 and is
+# provided in recipes/env-circuit-knitting.yml / env-later-additions.yml.
+# ==============================================================================
+name: lumi-iq-env
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pip
+  - jupyterlab
+  - ipywidgets
+  - scipy
+  - scikit-learn
+  - pandas
+  - networkx
+  - dill
+  - matplotlib
+  - pip:
+    - --extra-index-url https://opencode.it4i.eu/api/v4/projects/107/packages/pypi/simple
+    - qiskit-aer
+    - qiskit-algorithms
+    - qiskit-machine-learning
+    - qiskit-nature
+    - pyscf
+    - py4lexis
+    - qaas==0.5.3
+    - torch
+    - qiskit-addon-aqc-tensor
+    - qc-parallelizer

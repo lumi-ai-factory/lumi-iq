@@ -1,0 +1,20 @@
+--extra-index-url https://opencode.it4i.eu/api/v4/projects/107/packages/pypi/simple
+
+jupyterlab
+ipywidgets
+matplotlib
+scipy
+scikit-learn
+pandas
+networkx
+dill
+qiskit-aer
+qiskit-algorithms
+qiskit-machine-learning
+qiskit-nature
+pyscf
+py4lexis
+qaas==0.5.3
+torch
+qiskit-addon-aqc-tensor
+qc-parallelizer

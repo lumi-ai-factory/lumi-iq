@@ -1,0 +1,40 @@
+# ==============================================================================
+# LUMI-IQ Task 2.1 Recipe: Complete Consolidated Hybrid AI-QC Suite
+# Combines Section 3.4.1 (Initial Software) and Section 3.4.2 (Later Additions)
+# ==============================================================================
+name: lumi-iq-complete
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pip
+  - jupyterlab
+  - ipywidgets
+  - scipy
+  - scikit-learn
+  - pandas
+  - networkx
+  - dill
+  - matplotlib
+  - pip:
+    - --extra-index-url https://opencode.it4i.eu/api/v4/projects/107/packages/pypi/simple
+    - qiskit-aer
+    - qiskit-algorithms
+    - qiskit-machine-learning
+    - qiskit-nature
+    - pyscf
+    - py4lexis
+    - qaas==0.5.3
+    - torch
+    - circuit-knitting-toolbox
+    - qiskit-addon-aqc-tensor
+    - iqm-client[qiskit]
+    - iqm-qaoa
+    - iqm-qubit-selector
+    - iqm-error-reduction-tools
+    - fiqci-ems
+    - qc-parallelizer
+    - mqt.predictor
+    - pennylane
+    - pennylane-qiskit
+    - bqskit

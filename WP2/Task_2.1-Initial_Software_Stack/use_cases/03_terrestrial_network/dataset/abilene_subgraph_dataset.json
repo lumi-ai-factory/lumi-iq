@@ -1,0 +1,96 @@
+{
+  "meta": {
+    "source_topology": "Abilene (Internet Topology Zoo)",
+    "citation": "Knight, S., Nguyen, H.X., Falkner, N., Bowden, R., Roughan, M. 'The Internet Topology Zoo.' IEEE JSAC, 2011.",
+    "subgraph_selection": "BFS snowball sample, seeded, requires >=1 cycle",
+    "augmentation": "SYNTHETIC: cost = cost_per_km * haversine_distance_km; capacity = base_capacity_gbps * (1 + jitter), jitter ~ U(-0.3, 0.3). Real Abilene links are uniform OC-192; capacity heterogeneity here is entirely synthetic, introduced to make congestion-coupling terms non-trivial.",
+    "rng_seed": 42,
+    "target_subgraph_size": 7
+  },
+  "nodes": [
+    {
+      "id": 1,
+      "label": "Chicago"
+    },
+    {
+      "id": 2,
+      "label": "Washington DC"
+    },
+    {
+      "id": 6,
+      "label": "Denver"
+    },
+    {
+      "id": 7,
+      "label": "Kansas City"
+    },
+    {
+      "id": 8,
+      "label": "Houston"
+    },
+    {
+      "id": 9,
+      "label": "Atlanta"
+    },
+    {
+      "id": 10,
+      "label": "Indianapolis"
+    }
+  ],
+  "edges": [
+    {
+      "u": 1,
+      "v": 10,
+      "cost": 263.3248,
+      "capacity": 10.837,
+      "distance_km": 263.32
+    },
+    {
+      "u": 2,
+      "v": 9,
+      "cost": 871.9265,
+      "capacity": 7.15,
+      "distance_km": 871.93
+    },
+    {
+      "u": 6,
+      "v": 7,
+      "cost": 891.8049,
+      "capacity": 8.65,
+      "distance_km": 891.8
+    },
+    {
+      "u": 7,
+      "v": 8,
+      "cost": 1041.9471,
+      "capacity": 8.339,
+      "distance_km": 1041.95
+    },
+    {
+      "u": 7,
+      "v": 10,
+      "cost": 730.6469,
+      "capacity": 11.419,
+      "distance_km": 730.65
+    },
+    {
+      "u": 8,
+      "v": 9,
+      "cost": 1127.5585,
+      "capacity": 11.06,
+      "distance_km": 1127.56
+    },
+    {
+      "u": 9,
+      "v": 10,
+      "cost": 687.6034,
+      "capacity": 12.353,
+      "distance_km": 687.6
+    }
+  ],
+  "demand": {
+    "source": 1,
+    "sink": 2,
+    "demand_gbps": 5.98
+  }
+}
