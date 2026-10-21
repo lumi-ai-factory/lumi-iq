@@ -9,7 +9,7 @@ help([[
 Module: Lumi-IQ-ems/sim
 Naming Scheme: Lumi-IQ-<module_name>/<quantum_device>
 Module Name: ems (Error Mitigation & Classical Shadows)
-Target Device: Local High-Performance Simulator (Qiskit Aer on AMD EPYC CPU & AMD Instinct GPU)
+Target Device: Local High-Performance Simulator (Qiskit Aer on LUMI compute nodes)
 Software Root: /appl/local/lumiiq/software/lumi-iq-env
 
 Included Packages: fiqci-ems, Classical Shadows, Mitiq, PySCF, QaaS Client, Qiskit

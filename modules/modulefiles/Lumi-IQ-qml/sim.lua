@@ -9,7 +9,7 @@ help([[
 Module: Lumi-IQ-qml/sim
 Naming Scheme: Lumi-IQ-<module_name>/<quantum_device>
 Module Name: qml (Quantum Machine Learning & Hybrid AI Workflows)
-Target Device: Local High-Performance Simulator (Qiskit Aer on AMD EPYC CPU & AMD Instinct GPU)
+Target Device: Local High-Performance Simulator (Qiskit Aer on LUMI compute nodes)
 Software Root: /appl/local/lumiiq/software/lumi-iq-env
 
 Included Packages: PyTorch, Qiskit-Machine-Learning, Scikit-Learn, Scipy, Dill, NetworkX, Pandas, QaaS Client

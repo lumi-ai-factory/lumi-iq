@@ -9,7 +9,7 @@ help([[
 Module: Lumi-IQ-core/sim
 Naming Scheme: Lumi-IQ-<module_name>/<quantum_device>
 Module Name: core (Core Quantum Computing & Circuit Execution Stack)
-Target Device: Local High-Performance Simulator (Qiskit Aer on AMD EPYC CPU & AMD Instinct GPU)
+Target Device: Local High-Performance Simulator (Qiskit Aer on LUMI compute nodes)
 Software Root: /appl/local/lumiiq/software/lumi-iq-env
 
 Included Packages: Qiskit, Qiskit-Aer, Qiskit-Algorithms, Qiskit-IQM, QaaS Client, Py4LEXIS

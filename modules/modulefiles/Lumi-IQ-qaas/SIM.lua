@@ -9,7 +9,7 @@ help([[
 Module: Lumi-IQ-qaas/SIM
 Naming Scheme: Lumi-IQ-<module_name>/<quantum_device>
 Module Name: qaas (Quantum-as-a-Service Client & Hybrid AI Stack)
-Target Device: Local High-Performance Simulator (Qiskit Aer on AMD EPYC CPU & AMD Instinct GPU)
+Target Device: Local High-Performance Simulator (Qiskit Aer on LUMI compute nodes)
 Software Root: /appl/local/lumiiq/software/lumi-iq-env
 
 Features:
