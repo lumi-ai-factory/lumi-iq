@@ -36,28 +36,37 @@ module load LUMI/24.03 2>/dev/null || true
 module use /appl/local/lumiiq/modulefiles 2>/dev/null || true
 module use "$HOME/modulefiles" 2>/dev/null || true
 
-# 2. Load the LUMI-IQ environment
-if module is-avail Lumi-IQ-qaas/VLQ 2>/dev/null; then
-    module load Lumi-IQ-qaas/VLQ
-elif [ -d "$HOME/lumi-iq-env/bin" ]; then
-    export PATH="$HOME/lumi-iq-env/bin:$PATH"
-fi
-
-# 3. Securely set LEXIS authentication token
-TOKEN_FILE="$HOME/.lumi-iq/token"
-if [ -z "${LEXIS_TOKEN:-}" ] && [ -f "$TOKEN_FILE" ]; then
-    export LEXIS_TOKEN=$(cat "$TOKEN_FILE")
-    echo "Using secure token from $TOKEN_FILE (permissions: 0600)"
-fi
-
-if [ -z "${LEXIS_TOKEN:-}" ] && [ ! -f "$TOKEN_FILE" ]; then
-    echo "ERROR: LEXIS_TOKEN is not set and $TOKEN_FILE does not exist. Run python submit_job.py to authenticate first."
-    exit 1
+# 2. Load the LUMI-IQ environment (SIM or VLQ)
+TARGET_BACKEND="${LUMI_IQ_BACKEND:-${TARGET_BACKEND:-SIM}}"
+if [ "$TARGET_BACKEND" = "VLQ" ]; then
+    if module is-avail Lumi-IQ-qaas/VLQ 2>/dev/null; then
+        module load Lumi-IQ-qaas/VLQ
+    elif [ -d "$HOME/lumi-iq-env/bin" ]; then
+        export PATH="$HOME/lumi-iq-env/bin:$PATH"
+    fi
+    # 3. Securely set LEXIS authentication token for VLQ QPU
+    TOKEN_FILE="$HOME/.lumi-iq/token"
+    if [ -z "${LEXIS_TOKEN:-}" ] && [ -f "$TOKEN_FILE" ]; then
+        export LEXIS_TOKEN=$(cat "$TOKEN_FILE")
+        echo "Using secure token from $TOKEN_FILE (permissions: 0600)"
+    fi
+    if [ -z "${LEXIS_TOKEN:-}" ] && [ ! -f "$TOKEN_FILE" ]; then
+        echo "ERROR: LEXIS_TOKEN is not set and $TOKEN_FILE does not exist. Run python auth.py to authenticate first."
+        exit 1
+    fi
+else
+    # Simulation mode (runs locally without credentials)
+    if module is-avail Lumi-IQ-qaas/SIM 2>/dev/null; then
+        module load Lumi-IQ-qaas/SIM
+    elif [ -d "$HOME/lumi-iq-env/bin" ]; then
+        export PATH="$HOME/lumi-iq-env/bin:$PATH"
+    fi
+    echo "Running in local simulation mode (Qiskit Aer GPU/CPU; no tokens required)"
 fi
 
 # 4. Locate target script and arguments
 TARGET_SCRIPT="${TARGET_SCRIPT:-./vlq_bell_state.py}"
-TARGET_ARGS="${TARGET_ARGS:-}"
+TARGET_ARGS="${TARGET_ARGS:---backend $TARGET_BACKEND}"
 
 if [ ! -f "$TARGET_SCRIPT" ] && [ -n "${SLURM_SUBMIT_DIR:-}" ] && [ -f "$SLURM_SUBMIT_DIR/$TARGET_SCRIPT" ]; then
     TARGET_SCRIPT="$SLURM_SUBMIT_DIR/$TARGET_SCRIPT"
