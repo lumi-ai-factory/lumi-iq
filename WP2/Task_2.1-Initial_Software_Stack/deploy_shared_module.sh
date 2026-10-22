@@ -18,8 +18,12 @@ MODE="${2:---auto}" # --auto, --build, or --copy
 SOURCE_ENV="${3:-$HOME/lumi-iq-env}"
 RECIPE_FILE="${4:-$SCRIPT_DIR/env.yml}"
 
-if [[ "$PROJECT_ID" == "appl" || "$PROJECT_ID" == "lumiiq" || "$PROJECT_ID" == "/appl/local/lumiiq" ]]; then
-    SHARED_ROOT="/appl/local/lumiiq"
+if [[ "$PROJECT_ID" == "appl" || "$PROJECT_ID" == "lumiiq" || "$PROJECT_ID" == "/appl/local/lumiiq" || "$PROJECT_ID" == "/pfs/lustrep1/appl/local/lumiiq" ]]; then
+    if [ -d "/pfs/lustrep1/appl/local/lumiiq" ]; then
+        SHARED_ROOT="/pfs/lustrep1/appl/local/lumiiq"
+    else
+        SHARED_ROOT="/appl/local/lumiiq"
+    fi
 elif [[ "$PROJECT_ID" == /* ]]; then
     SHARED_ROOT="$PROJECT_ID"
 else
@@ -96,10 +100,14 @@ else
         "true"
 fi
 
+# Clean up obsolete / legacy module directories if present
+rm -rf "$SHARED_MODULE_ROOT/lumi-iq-qaas" 2>/dev/null || true
+rm -rf "$SHARED_MODULE_ROOT/lumi-iq-qiskit" 2>/dev/null || true
+
 # 4. Enforce strict permissions (Group + World readable)
-echo "Setting shared permissions (g+rX, o+rX)..."
-chmod -R g+rX,o+rX "$SHARED_SW_DIR" 2>/dev/null || true
-chmod -R g+rX,o+rX "$SHARED_MODULE_ROOT" 2>/dev/null || true
+echo "Setting shared permissions (g+rwX, o+rX)..."
+chmod -R g+rwX,o+rX "$SHARED_SW_DIR" 2>/dev/null || true
+chmod -R g+rwX,o+rX "$SHARED_MODULE_ROOT" 2>/dev/null || true
 
 # Set group ownership if user is in the project group (support appl_iq, lumiiq, or project group)
 for target_group in "appl_iq" "$PROJECT_ID" "lumiiq" "${LUMI_PROJECT:-}"; do
@@ -116,6 +124,45 @@ if [ -x "$SHARED_SW_DIR/bin/python" ]; then
     "$SHARED_SW_DIR/bin/python" -c "import qiskit, qaas, py4lexis; print('[VERIFIED] LUMI-IQ stack functional in shared location!')"
 else
     echo "Notice: Wrapper script $SHARED_SW_DIR/bin/python not directly executable outside LUMI compute/login nodes."
+fi
+
+# 6. Automatic Cluster Synchronization (LUMI multi-partition sync across lustrep1..4)
+if [ -d "/pfs/lustrep1/appl/local/lumiiq" ] && [[ "$SHARED_ROOT" == *"/pfs/lustrep1/appl/local/lumiiq"* || "$SHARED_ROOT" == *"/appl/local/lumiiq"* ]]; then
+    echo "======================================================================"
+    echo "Executing Automatic Cluster Synchronization across Lustre Partitions..."
+    echo "======================================================================"
+
+    SYNC_SCRIPT="/pfs/lustrep1/appl/local/lumiiq/scripts/sync_appl_quantum.sh"
+    if [ -f "$SYNC_SCRIPT" ]; then
+        echo "Triggering official cluster sync ($SYNC_SCRIPT)..."
+        echo "1" | bash "$SYNC_SCRIPT" 2>/dev/null || true
+    fi
+
+    # Ensure sync to destinations: lustrep2, lustrep3, lustrep4
+    destinations=( '/pfs/lustrep2/appl/local/lumiiq' '/pfs/lustrep3/appl/local/lumiiq' '/pfs/lustrep4/appl/local/lumiiq' )
+    for dest in "${destinations[@]}"; do
+        if [ -d "$(dirname "$dest")" ] && [ "$dest" != "$SHARED_ROOT" ]; then
+            echo "Syncing directly to $dest..."
+            mkdir -p "$dest/software" "$dest/modulefiles"
+            rsync -rlptDvh --delete "$SHARED_SW_DIR/" "$dest/software/lumi-iq-env/" 2>/dev/null || true
+            rsync -rlptDvh --delete "$SHARED_MODULE_ROOT/" "$dest/modulefiles/" 2>/dev/null || true
+            chgrp -R appl_iq "$dest" 2>/dev/null || true
+            chmod -R g+rwX,o+rX "$dest" 2>/dev/null || true
+        fi
+    done
+
+    # Also mirror to /appl/local/lumiiq if separate directory
+    if [ -d "/appl/local/lumiiq" ] && [ ! -L "/appl/local/lumiiq" ] && [ "/appl/local/lumiiq" != "$SHARED_ROOT" ]; then
+        echo "Mirroring to /appl/local/lumiiq..."
+        rsync -rlptDvh --delete "$SHARED_SW_DIR/" "/appl/local/lumiiq/software/lumi-iq-env/" 2>/dev/null || true
+        rsync -rlptDvh --delete "$SHARED_MODULE_ROOT/" "/appl/local/lumiiq/modulefiles/" 2>/dev/null || true
+        chgrp -R appl_iq "/appl/local/lumiiq" 2>/dev/null || true
+        chmod -R g+rwX,o+rX "/appl/local/lumiiq" 2>/dev/null || true
+    fi
+
+    echo "======================================================================"
+    echo "[SUCCESS] Multi-partition cluster synchronization complete!"
+    echo "======================================================================"
 fi
 
 echo "======================================================================"
