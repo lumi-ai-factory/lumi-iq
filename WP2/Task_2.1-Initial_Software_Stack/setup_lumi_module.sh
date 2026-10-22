@@ -15,9 +15,24 @@ IS_SHARED="${3:-false}"
 
 MODULE_DIR="${MODULE_ROOT}/Lumi-IQ-qaas"
 
+# Normalize Lustre partition staging paths to canonical system mount paths (/appl/local)
+if [[ "$ENV_DIR" =~ ^/pfs/lustrep[1-9](/appl/local/lumiiq.*) ]]; then
+    CANONICAL_ENV_DIR="${BASH_REMATCH[1]}"
+else
+    CANONICAL_ENV_DIR="$ENV_DIR"
+fi
+
+if [[ "$MODULE_ROOT" =~ ^/pfs/lustrep[1-9](/appl/local/lumiiq.*) ]]; then
+    CANONICAL_MODULE_ROOT="${BASH_REMATCH[1]}"
+else
+    CANONICAL_MODULE_ROOT="$MODULE_ROOT"
+fi
+
 echo "=== Configuring LUMI-IQ Lmod Module & Jupyter Kernel ==="
 echo "Target Software Directory : $ENV_DIR"
+echo "Canonical Env Directory   : $CANONICAL_ENV_DIR"
 echo "Module Root Directory     : $MODULE_ROOT"
+echo "Canonical Module Root     : $CANONICAL_MODULE_ROOT"
 echo "Shared / World-Readable   : $IS_SHARED"
 
 # 1. Create directory structure
@@ -63,10 +78,10 @@ Module: Lumi-IQ-qaas/VLQ
 Naming Scheme: Lumi-IQ-<module_name>/<quantum_device>
 Module Name: qaas (Quantum-as-a-Service Client & Hybrid AI Stack)
 Target Device: VLQ (24-qubit Star-topology transmon QPU at IT4Innovations)
-Software Root: $ENV_DIR
+Software Root: $CANONICAL_ENV_DIR
 
 Usage:
-  module use $MODULE_ROOT
+  module use $CANONICAL_MODULE_ROOT
   module load Lumi-IQ-qaas/VLQ
   python your_script.py
 
@@ -80,7 +95,7 @@ whatis("Category: Quantum Computing / Hybrid HPC-QC")
 whatis("Description: Official LUMI-IQ QaaS/VLQ Software Stack")
 whatis("URL: https://github.com/lumi-ai-factory/lumi-iq")
 
-local env_root = "$ENV_DIR"
+local env_root = "$CANONICAL_ENV_DIR"
 
 prepend_path("PATH", pathJoin(env_root, "bin"))
 prepend_path("JUPYTER_PATH", pathJoin(env_root, "share/jupyter"))
@@ -101,10 +116,10 @@ Module: Lumi-IQ-qaas/SIM
 Naming Scheme: Lumi-IQ-<module_name>/<quantum_device>
 Module Name: qaas (Quantum-as-a-Service Client & Hybrid AI Stack)
 Target Device: Local High-Performance Simulator (Qiskit Aer on AMD EPYC CPU & AMD Instinct GPU)
-Software Root: $ENV_DIR
+Software Root: $CANONICAL_ENV_DIR
 
 Usage:
-  module use $MODULE_ROOT
+  module use $CANONICAL_MODULE_ROOT
   module load Lumi-IQ-qaas/SIM
   python your_script.py
 
@@ -118,7 +133,7 @@ whatis("Category: Quantum Computing / Hybrid HPC-QC Simulator")
 whatis("Description: Official LUMI-IQ Simulation Stack (CPU/GPU local simulation)")
 whatis("URL: https://github.com/lumi-ai-factory/lumi-iq")
 
-local env_root = "$ENV_DIR"
+local env_root = "$CANONICAL_ENV_DIR"
 
 prepend_path("PATH", pathJoin(env_root, "bin"))
 prepend_path("JUPYTER_PATH", pathJoin(env_root, "share/jupyter"))
@@ -155,11 +170,11 @@ fi
 echo "======================================================================"
 echo "[SUCCESS] LUMI-IQ Module configured successfully!"
 echo "======================================================================"
-echo "Module files: $MODULE_DIR/1.0.lua"
+echo "Module files: $MODULE_DIR/VLQ.lua, $MODULE_DIR/SIM.lua"
 echo "Jupyter kernel: $KERNEL_DIR/kernel.json"
 echo ""
 echo "To load this module, run:"
-echo "  module use $MODULE_ROOT"
+echo "  module use $CANONICAL_MODULE_ROOT"
 echo "  module load Lumi-IQ-qaas/VLQ"
 echo ""
 echo "Verify functionality:"
