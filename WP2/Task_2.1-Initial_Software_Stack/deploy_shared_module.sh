@@ -101,9 +101,14 @@ echo "Setting shared permissions (g+rX, o+rX)..."
 chmod -R g+rX,o+rX "$SHARED_SW_DIR" 2>/dev/null || true
 chmod -R g+rX,o+rX "$SHARED_MODULE_ROOT" 2>/dev/null || true
 
-# Set group ownership if user is in the project group
-chgrp -R "$PROJECT_ID" "$SHARED_SW_DIR" 2>/dev/null || true
-chgrp -R "$PROJECT_ID" "$SHARED_MODULE_ROOT" 2>/dev/null || true
+# Set group ownership if user is in the project group (support appl_iq, lumiiq, or project group)
+for target_group in "appl_iq" "$PROJECT_ID" "lumiiq" "${LUMI_PROJECT:-}"; do
+    if [ -n "$target_group" ] && getent group "$target_group" &>/dev/null 2>&1; then
+        chgrp -R "$target_group" "$SHARED_SW_DIR" 2>/dev/null || true
+        chgrp -R "$target_group" "$SHARED_MODULE_ROOT" 2>/dev/null || true
+        break
+    fi
+done
 
 # 5. Verification Test
 echo "Verifying shared module deployment..."

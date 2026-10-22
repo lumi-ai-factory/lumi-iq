@@ -134,6 +134,14 @@ if [ "$IS_SHARED" = "true" ] || [ "$IS_SHARED" = "1" ]; then
     echo "Applying shared permissions (g+rX, o+rX)..."
     chmod -R g+rX,o+rX "$ENV_DIR" 2>/dev/null || true
     chmod -R g+rX,o+rX "$MODULE_ROOT" 2>/dev/null || true
+
+    for target_group in "appl_iq" "lumiiq" "${LUMI_PROJECT:-}"; do
+        if [ -n "$target_group" ] && getent group "$target_group" &>/dev/null 2>&1; then
+            chgrp -R "$target_group" "$ENV_DIR" 2>/dev/null || true
+            chgrp -R "$target_group" "$MODULE_ROOT" 2>/dev/null || true
+            break
+        fi
+    done
 fi
 
 # 7. Add to ~/.bashrc for user-level modules if not already present
