@@ -1,0 +1,17 @@
+site_name: LUMI-IQ docs preview
+theme:
+  name: material
+  features:
+    - content.code.copy
+    - navigation.sections
+
+markdown_extensions:
+  - admonition         
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
