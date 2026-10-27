@@ -29,7 +29,7 @@ From the root directory:
 ```bash
 uv venv .venv
 source venv/bin/activate 
-pip install -r WP2/docs/requirement.txt
+uv pip install -r WP2/docs/requirement.txt
 ```
 
 
