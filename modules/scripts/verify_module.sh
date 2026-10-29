@@ -15,7 +15,15 @@ RESET="\033[0m"
 
 APPL_ROOT="${1:-/appl/local/lumiiq}"
 MODULE_PATH="$APPL_ROOT/modulefiles"
-ENV_PATH="$APPL_ROOT/software/lumi-iq-env"
+if [ -d "$APPL_ROOT/software/lumi-iq-env" ]; then
+    ENV_PATH="$APPL_ROOT/software/lumi-iq-env"
+elif [ -d "$APPL_ROOT/lumi-iq-env" ]; then
+    ENV_PATH="$APPL_ROOT/lumi-iq-env"
+elif [ -d "$HOME/lumi-iq-env" ]; then
+    ENV_PATH="$HOME/lumi-iq-env"
+else
+    ENV_PATH="$APPL_ROOT/software/lumi-iq-env"
+fi
 
 echo -e "${BOLD}${CYAN}======================================================================${RESET}"
 echo -e "${BOLD}${CYAN}            LUMI-IQ Module Verification & Smoke Test                  ${RESET}"

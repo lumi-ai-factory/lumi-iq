@@ -180,7 +180,9 @@ cp -r "$MODULES_ROOT/modulefiles/"* "$MODULE_DIR/" 2>/dev/null || rsync -rlptDvh
 
 # If project/user scope, adapt env path in modulefiles
 if [ "$IS_SYSTEM" = "false" ]; then
-    sed -i "s|/appl/local/lumiiq/software/lumi-iq-env|$SW_DIR|g" "$MODULE_DIR"/Lumi-IQ-*/*.lua 2>/dev/null || true
+    sed -i "s|local base_root = \".*\"|local base_root = \"$PRODUCTION_ROOT\"|g" "$MODULE_DIR"/*/*.lua 2>/dev/null || true
+    sed -i "s|local env_root  = .*|local env_root  = \"$SW_DIR\"|g" "$MODULE_DIR"/*/*.lua 2>/dev/null || true
+    sed -i "s|Software Root: .*|Software Root: $SW_DIR|g" "$MODULE_DIR"/*/*.lua 2>/dev/null || true
 fi
 
 # Step 3: Synchronization (for system-wide deployment)
