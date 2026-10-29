@@ -35,7 +35,7 @@ try:
 except ImportError:
     HAS_PYMATCHING = False
 
-from qiskit import QuantumCircuit
+from qiskit import QuantumCircuit, transpile
 try:
     from qiskit_aer import AerSimulator
     HAS_AER = True
@@ -192,7 +192,9 @@ def run_qiskit_repetition_qec(backend_target="SIM", shots=1024):
         provider = QProvider(lexis_project=lexis_project, token=lexis_token)
         backend = provider.get_backend("VLQ-CZ")
         exec_target_name = f"Czech National QC ({backend.name} - 24 Qubits)"
-        job = backend.run(qc, shots=shots)
+        print(f"  Transpiling 5-qubit repetition circuit for VLQ Star-topology native basis gates (CZ, PRX)...")
+        t_qc = transpile(qc, backend=backend, optimization_level=1)
+        job = backend.run(t_qc, shots=shots, job_name="uc5_small_scale_qec")
         while not job.in_final_state():
             time.sleep(1)
         result = job.result()
