@@ -71,6 +71,9 @@ if [ -x "$ENV_PATH/bin/python" ]; then
     run_check "Import PyTorch" "$ENV_PATH/bin/python -c 'import torch'"
     run_check "Import NetworkX" "$ENV_PATH/bin/python -c 'import networkx'"
     run_check "Import Dill" "$ENV_PATH/bin/python -c 'import dill'"
+    run_check "Import Stim (QEC)" "$ENV_PATH/bin/python -c 'import stim'"
+    run_check "Import PyMatching (QEC)" "$ENV_PATH/bin/python -c 'import pymatching'"
+    run_check "Import PennyLane (QML)" "$ENV_PATH/bin/python -c 'import pennylane'"
 else
     echo -e "  ${YELLOW}[SKIP] $ENV_PATH/bin/python not found or not executable outside LUMI compute node.${RESET}"
 fi
