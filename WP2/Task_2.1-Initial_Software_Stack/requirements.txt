@@ -14,7 +14,8 @@ qiskit-machine-learning
 qiskit-nature
 pyscf
 py4lexis
-qaas==0.5.3
+qaas==0.5.4
+py4heappe<4.0.0
 torch
 qiskit-addon-aqc-tensor
 qc-parallelizer
