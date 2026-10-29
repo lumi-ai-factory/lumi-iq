@@ -73,6 +73,17 @@ conda-containerize new \
     --prefix "$TARGET_DIR" \
     "$ENV_FILE"
 
+# 2b. Inject QaaS for physical VLQ access without dependency pin conflict
+echo "Injecting QaaS client for physical VLQ hardware access..."
+POST_SCRIPT="$(mktemp /tmp/post_qaas_XXXXXX.sh)"
+cat << 'EOF' > "$POST_SCRIPT"
+#!/bin/bash
+pip install --no-deps --extra-index-url https://opencode.it4i.eu/api/v4/projects/107/packages/pypi/simple qaas==0.5.4
+EOF
+chmod +x "$POST_SCRIPT"
+conda-containerize update "$TARGET_DIR" --post-install "$POST_SCRIPT"
+rm -f "$POST_SCRIPT"
+
 echo "=== Tykky Container Built Successfully! ==="
 
 # 3. Automatically configure Lmod module

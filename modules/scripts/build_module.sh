@@ -95,6 +95,17 @@ conda-containerize new \
     --prefix "$TARGET_ENV" \
     "$RECIPE_FILE"
 
+# 4b. Inject QaaS for physical VLQ access without dependency pin conflict
+echo -e "${BOLD}Injecting QaaS client for physical VLQ hardware access...${RESET}"
+POST_SCRIPT="$(mktemp /tmp/post_qaas_XXXXXX.sh)"
+cat << 'EOF' > "$POST_SCRIPT"
+#!/bin/bash
+pip install --no-deps --extra-index-url https://opencode.it4i.eu/api/v4/projects/107/packages/pypi/simple qaas==0.5.4
+EOF
+chmod +x "$POST_SCRIPT"
+conda-containerize update "$TARGET_ENV" --post-install "$POST_SCRIPT"
+rm -f "$POST_SCRIPT"
+
 # 5. Register Jupyter kernel inside the container tree
 KERNEL_DIR="$TARGET_ENV/share/jupyter/kernels/lumi-iq"
 mkdir -p "$KERNEL_DIR"
