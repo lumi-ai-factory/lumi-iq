@@ -78,6 +78,7 @@ echo "Injecting QaaS client for physical VLQ hardware access..."
 POST_SCRIPT="$(mktemp /tmp/post_qaas_XXXXXX.sh)"
 cat << 'EOF' > "$POST_SCRIPT"
 #!/bin/bash
+pip install --no-deps truststore
 pip install --no-deps --extra-index-url https://opencode.it4i.eu/api/v4/projects/107/packages/pypi/simple qaas==0.5.4
 EOF
 chmod +x "$POST_SCRIPT"
