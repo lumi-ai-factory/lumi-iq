@@ -37,22 +37,35 @@ def main():
     failed = 0
     
     for name, mod, desc in TOOLS_TABLE:
-        try:
-            importlib.import_module(mod)
-            print(f"  [ PASS ] {name:<30} | {desc[:42]}")
-            passed += 1
-        except Exception as e:
-            # Fallback for QAOA if iqm_qaoa is not installed, check if Qiskit QAOA is available
-            if name == "IQM QAOA":
-                try:
-                    import qiskit_algorithms.minimum_eigensolvers.qaoa
-                    print(f"  [ PASS ] {name:<30} | via Qiskit Algorithms QAOA")
-                    passed += 1
-                    continue
-                except Exception:
-                    pass
-            print(f"  [ FAIL ] {name:<30} | Error: {e}")
-            failed += 1
+        success = False
+        candidates = [mod]
+        if name == "FiQCI-EMS":
+            candidates = ["fiqci.ems", "fiqci", "fiqci_ems"]
+        elif name == "QCut":
+            candidates = ["qiskit_addon_cutting", "circuit_knitting_toolbox"]
+        elif name == "IQM Qubit Selector":
+            candidates = ["iqm.qubit_selector", "iqm.qubit_selector.qubit_selector"]
+        elif name == "IQM Error Reduction Tools":
+            candidates = ["iqm.error_reduction_tools", "iqm.error_reduction"]
+        elif name == "IQM QAOA":
+            candidates = ["iqm_qaoa", "qiskit_algorithms.minimum_eigensolvers.qaoa"]
+
+        for c in candidates:
+            try:
+                importlib.import_module(c)
+                print(f"  [ PASS ] {name:<30} | {desc[:42]}")
+                passed += 1
+                success = True
+                break
+            except Exception:
+                continue
+
+        if not success:
+            try:
+                importlib.import_module(mod)
+            except Exception as e:
+                print(f"  [ FAIL ] {name:<30} | Error: {e}")
+                failed += 1
             
     print("=" * 80)
     print(f"Summary: {passed} / {len(TOOLS_TABLE)} tools verified successfully.")

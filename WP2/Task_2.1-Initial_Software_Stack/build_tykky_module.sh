@@ -68,19 +68,20 @@ fi
 
 echo "Using conda-containerize: $(which conda-containerize)"
 
-# 2. Run conda-containerize to build containerized Python 3.12 environment with post-install hook for QaaS
+# 2. Run conda-containerize new
+conda-containerize new \
+    --prefix "$TARGET_DIR" \
+    "$ENV_FILE"
+
+# 2b. Inject QaaS for physical VLQ access via conda-containerize update --post-install
+echo "Injecting QaaS client for physical VLQ hardware access..."
 POST_SCRIPT="$(mktemp /tmp/post_qaas_XXXXXX.sh)"
 cat << 'EOF' > "$POST_SCRIPT"
 #!/bin/bash
 pip install --no-deps --extra-index-url https://opencode.it4i.eu/api/v4/projects/107/packages/pypi/simple qaas==0.5.4
 EOF
 chmod +x "$POST_SCRIPT"
-
-conda-containerize new \
-    --prefix "$TARGET_DIR" \
-    --post-install "$POST_SCRIPT" \
-    "$ENV_FILE"
-
+conda-containerize update "$TARGET_DIR" --post-install "$POST_SCRIPT"
 rm -f "$POST_SCRIPT"
 
 echo "=== Tykky Container Built Successfully! ==="
