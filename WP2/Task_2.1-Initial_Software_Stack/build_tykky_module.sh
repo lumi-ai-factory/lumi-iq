@@ -20,7 +20,7 @@ echo "Target directory: $TARGET_DIR"
 echo "Environment definition: $ENV_FILE"
 
 # 0. Clean environment to prevent Tykky / Miniforge build collision
-module unload lumi-iq 2>/dev/null || true
+module unload lumi-iq Lumi-IQ-qaas Lumi-IQ 2>/dev/null || true
 unset PYTHONPATH 2>/dev/null || true
 unset PYTHONHOME 2>/dev/null || true
 unset CONDA_NO_PLUGINS 2>/dev/null || true
@@ -32,7 +32,7 @@ export SINGULARITYENV_PYTHONHOME=""
 NEW_PATH=""
 IFS=':' read -ra ADDR <<< "$PATH"
 for p in "${ADDR[@]}"; do
-    if [[ "$p" != *"$TARGET_DIR"* && -n "$p" ]]; then
+    if [[ "$p" != *"$TARGET_DIR"* && "$p" != *"lumi-iq-env"* && -n "$p" ]]; then
         if [ -z "$NEW_PATH" ]; then
             NEW_PATH="$p"
         else
