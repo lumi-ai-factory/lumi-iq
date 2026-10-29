@@ -78,6 +78,13 @@ def main():
 
     trajectory_file = os.path.join(script_dir, "vqe_trajectory.csv")
 
+    # Explicit SPSA learning_rate and perturbation bypass the automatic calibration phase
+    # and directly start optimization iterations.
+    learning_rate = 0.1
+    perturbation = 0.1
+    n_snapshots = 20 if args.max_iters <= 5 else 100
+    k_groups = 5 if args.max_iters <= 5 else 10
+
     try:
         run_workflow(
             atom=args.atom,
@@ -91,10 +98,12 @@ def main():
             shots=args.shots,
             trajectory_file=trajectory_file,
             replay_shots=args.shots,
-            N=100,
-            K=10,
+            N=n_snapshots,
+            K=k_groups,
             max_circuits_per_job=50,
             report_per_job_progress=True,
+            learning_rate=learning_rate,
+            perturbation=perturbation,
         )
     except Exception as e:
         print(f"\nWorkflow note: {e}")
