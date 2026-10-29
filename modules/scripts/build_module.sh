@@ -89,21 +89,21 @@ if [ -d "$TARGET_ENV" ]; then
 fi
 mkdir -p "$(dirname "$TARGET_ENV")"
 
-# 4. Execute conda-containerize
-echo -e "${BOLD}Building container image via Tykky... (approx. 3-4 minutes)${RESET}"
-conda-containerize new \
-    --prefix "$TARGET_ENV" \
-    "$RECIPE_FILE"
-
-# 4b. Inject QaaS for physical VLQ access without dependency pin conflict
-echo -e "${BOLD}Injecting QaaS client for physical VLQ hardware access...${RESET}"
+# 4. Prepare post-install hook for QaaS client (physical VLQ access without dependency pin conflict)
 POST_SCRIPT="$(mktemp /tmp/post_qaas_XXXXXX.sh)"
 cat << 'EOF' > "$POST_SCRIPT"
 #!/bin/bash
 pip install --no-deps --extra-index-url https://opencode.it4i.eu/api/v4/projects/107/packages/pypi/simple qaas==0.5.4
 EOF
 chmod +x "$POST_SCRIPT"
-conda-containerize update "$TARGET_ENV" --post-install "$POST_SCRIPT"
+
+# 5. Execute conda-containerize
+echo -e "${BOLD}Building container image via Tykky with post-install hook... (approx. 3-4 minutes)${RESET}"
+conda-containerize new \
+    --prefix "$TARGET_ENV" \
+    --post-install "$POST_SCRIPT" \
+    "$RECIPE_FILE"
+
 rm -f "$POST_SCRIPT"
 
 # 5. Register Jupyter kernel inside the container tree
