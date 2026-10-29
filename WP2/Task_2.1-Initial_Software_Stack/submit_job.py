@@ -186,6 +186,26 @@ def main():
     )
     args = parser.parse_args()
 
+    # Enforce mandatory LUMI project account for Slurm execution
+    account = (args.account or LUMI_PROJECT or os.getenv("LUMI_PROJECT", "")).strip()
+    if not account:
+        print("\n" + "=" * 80)
+        print("[ERROR] LUMI Project Account is Required for Slurm Batch Execution!")
+        print("=" * 80)
+        print("Slurm batch jobs on LUMI cannot be submitted without an active compute project account.")
+        print("\nPlease specify your account using one of the following methods:")
+        print("  1. Pass the --account flag:")
+        print("       python submit_job.py --account project_<id> ...")
+        print("       (or: bash run_all_tests.sh --backend VLQ --slurm --account project_<id>)")
+        print("  2. Export the environment variable in your terminal session:")
+        print("       export LUMI_PROJECT=project_<id>")
+        print("  3. Persist in local project configuration:")
+        print("       echo 'LUMI_PROJECT=project_<id>' >> .env")
+        print("\nTip: Run 'lumi-allocations' to view your active LUMI project IDs.")
+        print("=" * 80 + "\n")
+        sys.exit(1)
+    args.account = account
+
     # Map use cases to scripts and arguments
     script_dir = os.path.dirname(os.path.abspath(__file__))
     use_case_map = {
