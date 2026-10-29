@@ -63,8 +63,8 @@ To comply with the **LUMI Lustre Parallel Filesystem Policy**, Python packages a
 
 ### Option A: System-Wide Deployment (`/appl/local/lumiiq`)
 ```bash
-# Build, sync, and verify in one step:
-bash modules/scripts/deploy_module.sh --appl --build
+# Build, sync, and verify in one step (uses modules/recipes/env-initial.yml by default):
+bash modules/scripts/deploy_module.sh --appl --build --recipe modules/recipes/env-initial.yml
 
 # Or sync modulefiles only (without rebuilding container):
 bash modules/scripts/deploy_module.sh --appl
@@ -72,12 +72,12 @@ bash modules/scripts/deploy_module.sh --appl
 
 ### Option B: Project-Level Shared Deployment (`/project/<PROJECT_ID>/`)
 ```bash
-bash modules/scripts/deploy_module.sh --project <PROJECT_ID> --build
+bash modules/scripts/deploy_module.sh --project <PROJECT_ID> --build --recipe modules/recipes/env-initial.yml
 ```
 
 ### Option C: User Sandbox Deployment (`$HOME/lumi-iq-env`)
 ```bash
-bash modules/scripts/deploy_module.sh --user --build
+bash modules/scripts/deploy_module.sh --user --build --recipe modules/recipes/env-initial.yml
 ```
 
 ---

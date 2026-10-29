@@ -181,10 +181,10 @@ To deploy or update the central `/appl/local/lumiiq` software module on LUMI:
 
 ```bash
 # 1. Full end-to-end automated build, sync, and verification:
-bash modules/scripts/deploy_module.sh --appl --build
+bash modules/scripts/deploy_module.sh --appl --build --recipe modules/recipes/env-initial.yml
 
-# 2. Or build container only in Lustre staging:
-bash modules/scripts/build_module.sh /pfs/lustrep1/appl/local/lumiiq/software/lumi-iq-env
+# 2. Or user-space test build:
+bash modules/scripts/deploy_module.sh --user --build --recipe modules/recipes/env-initial.yml
 
 # 3. Synchronize Lustre staging to system /appl/local:
 bash modules/scripts/sync_to_appl.sh
