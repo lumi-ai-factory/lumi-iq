@@ -1,0 +1,43 @@
+# ==============================================================================
+# LUMI-IQ Task 2.1 Recipe: High-Performance Simulation Stack (SIM)
+# Target: Local CPU/GPU Simulators (Qiskit Aer GPU/CPU) on LUMI HPC
+#
+# Cutting-Edge Hybrid Classical/Quantum AI Stack (Standalone - No QaaS / No Tokens):
+# - Latest Qiskit 2.x & Qiskit Aer GPU/CPU Acceleration
+# - Latest IQM Client, IQM Qubit Selector & IQM Error Reduction Tools
+# - Small-Scale Quantum Error Correction (Stim, PyMatching)
+# - Quantum Machine Learning (PennyLane, PyTorch, scikit-learn)
+# - Circuit Knitting (QCut) & Noise Tailoring (FiQCI-EMS)
+# ==============================================================================
+name: lumi-iq-sim
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pip
+  - jupyterlab
+  - ipywidgets
+  - scipy
+  - scikit-learn
+  - pandas
+  - networkx
+  - dill
+  - matplotlib
+  - pip:
+    - qiskit-aer
+    - qiskit-algorithms
+    - qiskit-machine-learning
+    - qiskit-nature
+    - pyscf
+    - torch
+    - qiskit-addon-aqc-tensor
+    - qc-parallelizer
+    - stim
+    - pymatching
+    - pennylane
+    - pennylane-qiskit
+    - iqm-client[qiskit]
+    - iqm-qubit-selector
+    - iqm-error-reduction-tools
+    - fiqci-ems
+    - qiskit-addon-cutting
