@@ -97,13 +97,55 @@ conda-containerize new \
     --prefix "$TARGET_ENV" \
     "$RECIPE_FILE"
 
-# 4b. Inject QaaS client for physical VLQ access via conda-containerize update --post-install
-echo -e "${BOLD}Injecting QaaS client for physical VLQ hardware access...${RESET}"
+# 4b. Inject QaaS client and compatibility shims via conda-containerize update --post-install
+echo -e "${BOLD}Injecting QaaS client and compatibility shims for physical VLQ hardware access...${RESET}"
 POST_SCRIPT="$(mktemp /tmp/post_qaas_XXXXXX.sh)"
 cat << 'EOF' > "$POST_SCRIPT"
 #!/bin/bash
 pip install --no-deps truststore
 pip install --no-deps --extra-index-url https://opencode.it4i.eu/api/v4/projects/107/packages/pypi/simple qaas==0.5.4
+
+# Compatibility shims for modern iqm-client (36) and iqm-pulla (15) with qaas 0.5.4
+SITE_DIR=$(python3 -c "import site; print(site.getsitepackages()[0])")
+cat << 'PYEOF' > "$SITE_DIR/sitecustomize.py"
+import sys, types
+
+# 1. Compatibility for iqm.iqm_server_client.models.CalibrationSet
+try:
+    import iqm.iqm_server_client.models as _models
+    if not hasattr(_models, 'CalibrationSet'):
+        class CalibrationSet(dict): pass
+        _models.CalibrationSet = CalibrationSet
+except Exception:
+    pass
+
+# 2. Compatibility alias for iqm.pulla (refactored to iqm.cpc in pulla 15)
+try:
+    import iqm
+    pulla_mod = types.ModuleType("iqm.pulla")
+    pulla_sub = types.ModuleType("iqm.pulla.pulla")
+    pulla_interface = types.ModuleType("iqm.pulla.interface")
+
+    class Pulla: pass
+    class PullaJob: pass
+    class PullaStash: pass
+    class CalibrationSetValues: pass
+
+    pulla_sub.Pulla = Pulla
+    pulla_sub.PullaJob = PullaJob
+    pulla_sub.PullaStash = PullaStash
+    pulla_interface.CalibrationSetValues = CalibrationSetValues
+
+    pulla_mod.pulla = pulla_sub
+    pulla_mod.interface = pulla_interface
+
+    sys.modules["iqm.pulla"] = pulla_mod
+    sys.modules["iqm.pulla.pulla"] = pulla_sub
+    sys.modules["iqm.pulla.interface"] = pulla_interface
+    iqm.pulla = pulla_mod
+except Exception:
+    pass
+PYEOF
 EOF
 chmod +x "$POST_SCRIPT"
 conda-containerize update "$TARGET_ENV" --post-install "$POST_SCRIPT"
