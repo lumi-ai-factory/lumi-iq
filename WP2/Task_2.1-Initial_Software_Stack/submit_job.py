@@ -138,9 +138,9 @@ def main():
     )
     parser.add_argument(
         "--use-case",
-        choices=["1", "2", "3", "4", "all", "bell"],
+        choices=["1", "2", "3", "4", "5", "all", "bell"],
         default="bell",
-        help="Target use case to run as Slurm HPC job (1, 2, 3, 4, all, or bell; default: bell)",
+        help="Target use case to run as Slurm HPC job (1, 2, 3, 4, 5, all, or bell; default: bell)",
     )
     parser.add_argument(
         "--backend",
@@ -179,6 +179,7 @@ def main():
         "2": (os.path.join(script_dir, "use_cases/02_health_life_science/run_health_vqe.py"), f"--backend {args.backend}", "00:20:00"),
         "3": (os.path.join(script_dir, "use_cases/03_terrestrial_network/run_terrestrial_network.py"), f"--backend {args.backend}", "00:10:00"),
         "4": (os.path.join(script_dir, "use_cases/04_qml_time_series/run_time_series_forecasting.py"), f"--backend {args.backend}", "00:15:00"),
+        "5": (os.path.join(script_dir, "use_cases/05_small_scale_qec/run_small_scale_qec.py"), f"--backend {args.backend}", "00:10:00"),
         "all": (os.path.join(script_dir, "run_all_tests.py"), f"--backend {args.backend}", "00:30:00"),
     }
 
