@@ -110,21 +110,36 @@ def resolve_scratch_base(custom_dir: str | None = None, account: str | None = No
     """Resolves LUMI scratch directory for job runs."""
     if custom_dir:
         return os.path.abspath(custom_dir)
-    account = account or LUMI_PROJECT or os.getenv("LUMI_PROJECT", "")
+    account = (account or LUMI_PROJECT or os.getenv("LUMI_PROJECT", "")).strip()
     user = os.environ.get("USER", os.getenv("LOGNAME", "user"))
-    scratch = os.environ.get("SCRATCH")
-    if scratch and os.path.exists(scratch):
+
+    candidates = []
+    scratch = os.environ.get("SCRATCH", "").strip()
+    if scratch and os.path.isdir(scratch) and scratch != "/scratch":
         if user not in scratch:
-            return os.path.join(scratch, user, "lumi-iq-jobs")
-        return os.path.join(scratch, "lumi-iq-jobs")
-    for candidate in [
-        f"/scratch/{account}/{user}/lumi-iq-jobs",
-        f"/scratch/{account}/lumi-iq-jobs",
-        os.path.expanduser("~/scratch/lumi-iq-jobs"),
-    ]:
-        if os.path.exists(os.path.dirname(candidate)):
-            return candidate
-    return os.path.expanduser("~/lumi-iq-jobs")
+            candidates.append(os.path.join(scratch, user, "lumi-iq-jobs"))
+        candidates.append(os.path.join(scratch, "lumi-iq-jobs"))
+
+    if account:
+        for prefix in ["/scratch", "/pfs/lustrep1/scratch", "/pfs/lustrep2/scratch"]:
+            candidates.append(os.path.join(prefix, account, user, "lumi-iq-jobs"))
+            candidates.append(os.path.join(prefix, account, "lumi-iq-jobs"))
+
+    candidates.append(os.path.expanduser("~/scratch/lumi-iq-jobs"))
+    candidates.append(os.path.expanduser("~/lumi-iq-jobs"))
+
+    for cand in candidates:
+        parent = os.path.dirname(cand)
+        if os.path.isdir(parent) and os.access(parent, os.W_OK):
+            try:
+                os.makedirs(cand, exist_ok=True)
+                return cand
+            except OSError:
+                continue
+
+    fallback = os.path.expanduser("~/lumi-iq-jobs")
+    os.makedirs(fallback, exist_ok=True)
+    return fallback
 
 
 def main():
@@ -263,15 +278,16 @@ def main():
     sbatch_script = os.path.join(script_dir, "submit_lumi.sbatch")
     cmd = [
         "sbatch",
-        f"--account={args.account}",
         f"--chdir={run_dir}",
         f"--output={run_dir}/lumi_iq_%j.out",
         f"--error={run_dir}/lumi_iq_%j.err",
         f"--time={slurm_time_str}",
         f"--deadline={deadline_iso}",
         f"--export=ALL,TARGET_SCRIPT={target_script},TARGET_ARGS={target_args}",
-        sbatch_script,
     ]
+    if args.account and args.account.strip():
+        cmd.insert(1, f"--account={args.account.strip()}")
+    cmd.append(sbatch_script)
 
     print(f"Executing: {' '.join(cmd)}")
     res = subprocess.run(cmd, capture_output=True, text=True)
