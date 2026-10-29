@@ -32,7 +32,7 @@ export SINGULARITYENV_PYTHONHOME=""
 NEW_PATH=""
 IFS=':' read -ra ADDR <<< "$PATH"
 for p in "${ADDR[@]}"; do
-    if [[ "$p" != *"$TARGET_DIR"* && "$p" != *"lumi-iq-env"* && -n "$p" ]]; then
+    if [[ "$p" != *"$TARGET_DIR"* && "$p" != *"lumi-iq-env"* && "$p" != *"lumiiq"* && -n "$p" ]]; then
         if [ -z "$NEW_PATH" ]; then
             NEW_PATH="$p"
         else

@@ -40,6 +40,8 @@ echo -e "Recipe File        : ${BOLD}$RECIPE_FILE${RESET}"
 echo -e "${CYAN}----------------------------------------------------------------------${RESET}"
 
 # 1. Clean environment
+module unload Lumi-IQ-qaas/VLQ 2>/dev/null || true
+module unload Lumi-IQ-qaas/SIM 2>/dev/null || true
 module unload lumi-iq 2>/dev/null || true
 unset PYTHONPATH 2>/dev/null || true
 unset PYTHONHOME 2>/dev/null || true
@@ -49,11 +51,11 @@ export SINGULARITYENV_PYTHONPATH=""
 export APPTAINERENV_PYTHONHOME=""
 export SINGULARITYENV_PYTHONHOME=""
 
-# Strip any target paths from PATH
+# Strip any existing lumi-iq / lumiiq container paths from PATH to satisfy Tykky validation
 NEW_PATH=""
 IFS=':' read -ra ADDR <<< "$PATH"
 for p in "${ADDR[@]}"; do
-    if [[ "$p" != *"$TARGET_ENV"* && -n "$p" ]]; then
+    if [[ "$p" != *"lumi-iq"* && "$p" != *"lumiiq"* && "$p" != *"$TARGET_ENV"* && -n "$p" ]]; then
         if [ -z "$NEW_PATH" ]; then
             NEW_PATH="$p"
         else
