@@ -44,4 +44,3 @@ dependencies:
     - iqm-error-reduction-tools
     - fiqci-ems
     - qiskit-addon-cutting
-    - mqt.predictor
