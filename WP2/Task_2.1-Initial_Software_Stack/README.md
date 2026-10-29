@@ -20,7 +20,7 @@ It provides an end-to-end operational pipeline connecting the **LUMI supercomput
 | **[config.py](config.py)** | Centralized configuration loader for LUMI and LEXIS projects. |
 | **[run_all_tests.sh](run_all_tests.sh)** | Master single-command test suite runner executing all stack checks, QPU connectivity, and all 4 WP2 use cases. |
 | **[run_all_tests.py](run_all_tests.py)** | Underlying Python test orchestrator supporting `--backend SIM|VLQ`, selective test filters, and structured reporting. |
-| **[use_cases/](use_cases/)** | Directory containing the 4 standardized WP2 use cases (Car Manufacturing, Health & Life Science, Terrestrial Network, QML Time Series) adapted for LUMI. |
+| **[use_cases/](use_cases/)** | Directory containing the standardized WP2 use cases (Car Manufacturing, Health & Life Science, Terrestrial Network, QML Time Series, and Small-Scale QEC) adapted for LUMI. |
 | **[.env.example](.env.example)** | Template for local environment variable configuration (no secrets). |
 
 ---

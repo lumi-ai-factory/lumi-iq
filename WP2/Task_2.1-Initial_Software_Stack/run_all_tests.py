@@ -12,6 +12,7 @@ Executes end-to-end verification across:
   5. Use Case 2: Health & Life Science Molecular VQE (LiH Ground State Energy)
   6. Use Case 3: Terrestrial Network QKD Routing Optimization (BF-DCQO vs QAOA)
   7. Use Case 4: QML Time Series Electricity Price Forecasting (8-Qubit QNN)
+  8. Small-Scale QEC: Stabilizer Simulation & Repetition Code (Stim, PyMatching, Qiskit)
 
 Usage:
   python run_all_tests.py --backend SIM           # Fast local simulation benchmark (~1-2 min)
@@ -110,6 +111,9 @@ def test_software_stack():
         ("qiskit_machine_learning", "QML Extension", False),
         ("qiskit_nature", "Quantum Chemistry Extension", False),
         ("pyscf", "Electronic Structure Backend", False),
+        ("stim", "Small-scale QEC Simulator", False),
+        ("pymatching", "MWPM Syndrome Decoder", False),
+        ("pennylane", "Hybrid QML Framework", False),
     ]
 
     installed = {}
@@ -382,7 +386,7 @@ def main():
     if not args.skip_use_cases:
         selected_ucs = []
         if args.use_cases.lower() == "all":
-            selected_ucs = [1, 2, 3, 4]
+            selected_ucs = [1, 2, 3, 4, 5]
         else:
             for item in args.use_cases.split(","):
                 if item.strip().isdigit():
@@ -393,9 +397,10 @@ def main():
             2: ("Health Molecular VQE (H2)", "use_cases/02_health_life_science/run_health_vqe.py", ["--max-iters", "2"]),
             3: ("Terrestrial Network Routing", "use_cases/03_terrestrial_network/run_terrestrial_network.py", []),
             4: ("QML Time Series Forecasting", "use_cases/04_qml_time_series/run_time_series_forecasting.py", []),
+            5: ("Small-Scale QEC (Stim & Repetition)", "use_cases/05_small_scale_qec/run_small_scale_qec.py", []),
         }
 
-        for uc_num in [1, 2, 3, 4]:
+        for uc_num in [1, 2, 3, 4, 5]:
             if uc_num in selected_ucs:
                 name, relpath, extra = use_case_defs[uc_num]
                 results.append(run_use_case_subprocess(uc_num, name, relpath, args.backend, extra))

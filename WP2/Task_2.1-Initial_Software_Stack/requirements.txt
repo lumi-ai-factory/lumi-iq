@@ -18,3 +18,7 @@ qaas==0.5.3
 torch
 qiskit-addon-aqc-tensor
 qc-parallelizer
+stim
+pymatching
+pennylane
+pennylane-qiskit

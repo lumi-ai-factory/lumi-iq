@@ -1,6 +1,7 @@
 # ==============================================================================
 # LUMI-IQ Task 2.1 Recipe: Complete Consolidated Hybrid AI-QC Suite
 # Combines Section 3.4.1 (Initial Software) and Section 3.4.2 (Later Additions)
+# Includes Small-Scale Quantum Error Correction (Stim, PyMatching)
 # ==============================================================================
 name: lumi-iq-complete
 channels:
@@ -34,6 +35,8 @@ dependencies:
     - iqm-error-reduction-tools
     - fiqci-ems
     - qc-parallelizer
+    - stim
+    - pymatching
     - mqt.predictor
     - pennylane
     - pennylane-qiskit

@@ -16,6 +16,7 @@ All 4 use cases require between **4 and 8 qubits**, making them an architectural
 | **2** | **[02_health_life_science](02_health_life_science/)** | 4 Qubits | PySCF Hartree-Fock calculation, active space selection, Jordan-Wigner Hamiltonian | Executes VQE parameter optimization and Classical Shadows snapshot measurements | `python run_health_vqe.py --backend VLQ` |
 | **3** | **[03_terrestrial_network](03_terrestrial_network/)** | 8 Qubits | QUBO formulation, Ising Hamiltonian mapping, and analytical parameter calculation | Evaluates 8-qubit BF-DCQO routing circuit transpiled to native IQM Star gates (`CZ`, `PRX`) | `python run_terrestrial_network.py --backend VLQ` |
 | **4** | **[04_qml_time_series](04_qml_time_series/)** | 8 Qubits | COBYLA optimization of 80 variational $\theta$ parameters on CPU | Dispatches the 1-hour ahead price forecast circuit to VLQ, measuring $\langle Z_0 \rangle$ | `python run_time_series_forecasting.py --backend VLQ` |
+| **5** | **[05_small_scale_qec](05_small_scale_qec/)** | 5 Qubits | Stabilizer simulation (Stim), noise injection, and MWPM syndrome decoding (PyMatching) | Evaluates 5-qubit repetition code on VLQ QPU / Aer SIM with syndrome ancilla readout | `python run_small_scale_qec.py --backend VLQ` |
 
 ---
 

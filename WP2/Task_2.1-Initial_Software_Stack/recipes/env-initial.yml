@@ -2,9 +2,11 @@
 # LUMI-IQ Task 2.1 Recipe: Initial Software Stack (Section 3.4.1 Baseline)
 # Target: Czech National Quantum Computer (VLQ) & LUMI HPC
 #
-# Verified Qiskit 2.x & QaaS 0.5.3 production stack for LUMI.
-# Note: circuit-knitting-toolbox (QCut) currently requires Qiskit <2.0 and is
-# provided in recipes/env-circuit-knitting.yml / env-later-additions.yml.
+# Verified Qiskit 2.x & QaaS 0.5.3 production stack for LUMI with:
+# - Core Quantum SDK & High-Performance Simulators (Qiskit Aer GPU/CPU)
+# - Small-Scale Quantum Error Correction (Stim, PyMatching)
+# - Quantum Machine Learning (PennyLane, PyTorch, scikit-learn)
+# - Topology-Aware Compilation, Transpilation & Error Mitigation
 # ==============================================================================
 name: lumi-iq-env
 channels:
@@ -32,3 +34,7 @@ dependencies:
     - torch
     - qiskit-addon-aqc-tensor
     - qc-parallelizer
+    - stim
+    - pymatching
+    - pennylane
+    - pennylane-qiskit
