@@ -73,17 +73,21 @@ conda-containerize new \
     --prefix "$TARGET_DIR" \
     "$ENV_FILE"
 
-# 2b. Inject QaaS and fiqci-ems via conda-containerize update --post-install
-echo "Injecting QaaS client for physical VLQ hardware access..."
-POST_SCRIPT="$(mktemp /tmp/post_qaas_XXXXXX.sh)"
-cat << 'EOF' > "$POST_SCRIPT"
+# 2b. Inject QaaS client for physical VLQ hardware access (skipped for SIM recipes)
+if [[ "$ENV_FILE" == *"sim"* ]]; then
+    echo "High-performance simulation recipe detected ($ENV_FILE): Skipping QaaS hardware gateway injection."
+else
+    echo "Injecting QaaS client for physical VLQ hardware access..."
+    POST_SCRIPT="$(mktemp /tmp/post_qaas_XXXXXX.sh)"
+    cat << 'EOF' > "$POST_SCRIPT"
 #!/bin/bash
 pip install --no-deps fiqci-ems
 pip install --extra-index-url https://opencode.it4i.eu/api/v4/projects/107/packages/pypi/simple qaas==0.5.4
 EOF
-chmod +x "$POST_SCRIPT"
-conda-containerize update "$TARGET_DIR" --post-install "$POST_SCRIPT"
-rm -f "$POST_SCRIPT"
+    chmod +x "$POST_SCRIPT"
+    conda-containerize update "$TARGET_DIR" --post-install "$POST_SCRIPT"
+    rm -f "$POST_SCRIPT"
+fi
 
 echo "=== Tykky Container Built Successfully! ==="
 

@@ -28,6 +28,9 @@ whatis("URL: https://github.com/lumi-ai-factory/lumi-iq")
 
 local base_root = "/appl/local/lumiiq"
 local env_root  = pathJoin(base_root, "software/lumi-iq-env")
+if not isDir(env_root) then
+    env_root    = pathJoin(base_root, "lumi-iq-env")
+end
 
 prepend_path("PATH", pathJoin(env_root, "bin"))
 prepend_path("JUPYTER_PATH", pathJoin(env_root, "share/jupyter"))

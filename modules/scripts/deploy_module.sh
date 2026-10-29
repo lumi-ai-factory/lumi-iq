@@ -80,11 +80,17 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+# Resolve environment container name
+ENV_NAME="lumi-iq-env"
+if [[ "$RECIPE_FILE" == *"sim"* ]]; then
+    ENV_NAME="lumi-iq-sim"
+fi
+
 # Resolve paths based on deployment target
 if [ "$DEPLOY_TARGET" = "appl" ]; then
     STAGING_ROOT="/pfs/lustrep1/appl/local/lumiiq"
     PRODUCTION_ROOT="/appl/local/lumiiq"
-    SW_DIR="$STAGING_ROOT/software/lumi-iq-env"
+    SW_DIR="$STAGING_ROOT/software/$ENV_NAME"
     MODULE_DIR="$STAGING_ROOT/modulefiles"
     IS_SYSTEM=true
 elif [ "$DEPLOY_TARGET" = "project" ]; then
@@ -97,13 +103,13 @@ elif [ "$DEPLOY_TARGET" = "project" ]; then
         STAGING_ROOT="/scratch/${PROJECT_ID}"
     fi
     PRODUCTION_ROOT="$STAGING_ROOT"
-    SW_DIR="$STAGING_ROOT/software/lumi-iq-env"
+    SW_DIR="$STAGING_ROOT/software/$ENV_NAME"
     MODULE_DIR="$STAGING_ROOT/modulefiles"
     IS_SYSTEM=false
 else # user
     STAGING_ROOT="$HOME"
     PRODUCTION_ROOT="$HOME"
-    SW_DIR="$HOME/lumi-iq-env"
+    SW_DIR="$HOME/$ENV_NAME"
     MODULE_DIR="$HOME/modulefiles"
     IS_SYSTEM=false
 fi
@@ -178,10 +184,9 @@ echo -e "${BOLD}[Step 2/3] Installing modulefiles to $MODULE_DIR ...${RESET}"
 mkdir -p "$MODULE_DIR"
 cp -r "$MODULES_ROOT/modulefiles/"* "$MODULE_DIR/" 2>/dev/null || rsync -rlptDvh --omit-dir-times "$MODULES_ROOT/modulefiles/" "$MODULE_DIR/" || true
 
-# If project/user scope, adapt env path in modulefiles
+# If project/user scope, adapt base path in modulefiles
 if [ "$IS_SYSTEM" = "false" ]; then
     sed -i "s|local base_root = \".*\"|local base_root = \"$PRODUCTION_ROOT\"|g" "$MODULE_DIR"/*/*.lua 2>/dev/null || true
-    sed -i "s|local env_root  = .*|local env_root  = \"$SW_DIR\"|g" "$MODULE_DIR"/*/*.lua 2>/dev/null || true
     sed -i "s|Software Root: .*|Software Root: $SW_DIR|g" "$MODULE_DIR"/*/*.lua 2>/dev/null || true
 fi
 

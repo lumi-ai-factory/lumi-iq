@@ -27,7 +27,14 @@ whatis("Description: LUMI-IQ Error Mitigation & Classical Shadows Stack (Simulat
 whatis("URL: https://github.com/lumi-ai-factory/lumi-iq")
 
 local base_root = "/appl/local/lumiiq"
-local env_root  = pathJoin(base_root, "software/lumi-iq-env")
+local sim_dir   = pathJoin(base_root, "software/lumi-iq-sim")
+if not isDir(sim_dir) then
+    sim_dir     = pathJoin(base_root, "lumi-iq-sim")
+end
+local env_root  = isDir(sim_dir) and sim_dir or pathJoin(base_root, "software/lumi-iq-env")
+if not isDir(env_root) then
+    env_root    = pathJoin(base_root, "lumi-iq-env")
+end
 
 prepend_path("PATH", pathJoin(env_root, "bin"))
 prepend_path("JUPYTER_PATH", pathJoin(env_root, "share/jupyter"))

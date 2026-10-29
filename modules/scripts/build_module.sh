@@ -97,17 +97,21 @@ conda-containerize new \
     --prefix "$TARGET_ENV" \
     "$RECIPE_FILE"
 
-# 4b. Inject QaaS client and fiqci-ems for physical VLQ hardware access
-echo -e "${BOLD}Injecting QaaS client for physical VLQ hardware access...${RESET}"
-POST_SCRIPT="$(mktemp /tmp/post_qaas_XXXXXX.sh)"
-cat << 'EOF' > "$POST_SCRIPT"
+# 4b. Inject QaaS client for physical VLQ hardware access (skipped for SIM recipes)
+if [[ "$RECIPE_FILE" == *"sim"* ]]; then
+    echo -e "${BOLD}${GREEN}[INFO] High-performance simulation recipe detected ($RECIPE_FILE): Skipping QaaS hardware gateway injection.${RESET}"
+else
+    echo -e "${BOLD}Injecting QaaS client for physical VLQ hardware access...${RESET}"
+    POST_SCRIPT="$(mktemp /tmp/post_qaas_XXXXXX.sh)"
+    cat << 'EOF' > "$POST_SCRIPT"
 #!/bin/bash
 pip install --no-deps fiqci-ems
 pip install --extra-index-url https://opencode.it4i.eu/api/v4/projects/107/packages/pypi/simple qaas==0.5.4
 EOF
-chmod +x "$POST_SCRIPT"
-conda-containerize update "$TARGET_ENV" --post-install "$POST_SCRIPT"
-rm -f "$POST_SCRIPT"
+    chmod +x "$POST_SCRIPT"
+    conda-containerize update "$TARGET_ENV" --post-install "$POST_SCRIPT"
+    rm -f "$POST_SCRIPT"
+fi
 
 # 5. Register Jupyter kernel inside the container tree
 KERNEL_DIR="$TARGET_ENV/share/jupyter/kernels/lumi-iq"
