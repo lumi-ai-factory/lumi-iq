@@ -39,3 +39,10 @@ dependencies:
     - pymatching
     - pennylane
     - pennylane-qiskit
+    - iqm-client[qiskit]
+    - iqm-qaoa
+    - iqm-qubit-selector
+    - iqm-error-reduction-tools
+    - fiqci-ems
+    - qiskit-addon-cutting
+    - mqt.predictor
