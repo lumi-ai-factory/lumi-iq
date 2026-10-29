@@ -93,7 +93,7 @@ def print_banner(backend):
 # -----------------------------------------------------------------------------
 def test_software_stack():
     start_time = time.time()
-    print(f"{BOLD}[TEST 1/7] Verifying Software Stack & Python Environment...{RESET}")
+    print(f"{BOLD}[TEST 1/8] Verifying Software Stack & Python Environment...{RESET}")
 
     packages = [
         ("qiskit", "Core Quantum SDK", True),
@@ -146,7 +146,7 @@ def test_software_stack():
 # -----------------------------------------------------------------------------
 def test_lexis_authentication(backend_target):
     start_time = time.time()
-    print(f"\n{BOLD}[TEST 2/7] Checking LEXIS Authentication & VLQ Target...{RESET}")
+    print(f"\n{BOLD}[TEST 2/8] Checking LEXIS Authentication & VLQ Target...{RESET}")
 
     try:
         from config import LEXIS_PROJECT, LEXIS_RESOURCE, get_lexis_token
@@ -207,7 +207,7 @@ def test_lexis_authentication(backend_target):
 # -----------------------------------------------------------------------------
 def test_core_bell_state(backend_target, shots=1024):
     start_time = time.time()
-    print(f"\n{BOLD}[TEST 3/7] Running Core Bell State Circuit Benchmark...{RESET}")
+    print(f"\n{BOLD}[TEST 3/8] Running Core Bell State Circuit Benchmark...{RESET}")
 
     from qiskit import QuantumCircuit, transpile
 
@@ -259,11 +259,11 @@ def test_core_bell_state(backend_target, shots=1024):
 
 
 # -----------------------------------------------------------------------------
-# TEST 4-7: WP2 Use Cases Verification Runner
+# TEST 4-8: WP2 Use Cases Verification Runner
 # -----------------------------------------------------------------------------
 def run_use_case_subprocess(uc_num, name, script_relpath, backend_target, extra_args=None, timeout_sec=600):
     start_time = time.time()
-    print(f"\n{BOLD}[TEST {uc_num+3}/7] Running Use Case {uc_num}: {name}...{RESET}")
+    print(f"\n{BOLD}[TEST {uc_num+3}/8] Running Use Case {uc_num}: {name}...{RESET}")
 
     script_path = os.path.join(SCRIPT_DIR, script_relpath)
     if not os.path.exists(script_path):
@@ -382,7 +382,7 @@ def main():
     # Stage 3: Core Bell State Benchmark
     results.append(test_core_bell_state(args.backend, shots=args.shots))
 
-    # Stage 4-7: WP2 Use Cases
+    # Stage 4-8: WP2 Use Cases
     if not args.skip_use_cases:
         selected_ucs = []
         if args.use_cases.lower() == "all":
