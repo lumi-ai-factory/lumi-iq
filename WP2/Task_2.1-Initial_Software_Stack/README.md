@@ -64,8 +64,8 @@ You can immediately verify the installation using the local quantum simulator or
 
 - **Option B: Physical Quantum Execution on VLQ QPU:**
   ```bash
-  # 1. Set your allocated LEXIS project (e.g. vlq_demo_project):
-  export LEXIS_PROJECT=vlq_demo_project
+  # 1. Set your allocated LEXIS project:
+  export LEXIS_PROJECT=your_vlq_project
 
   # 2. Authenticate once via browser (OAuth 2.0 Device Flow):
   python auth.py
@@ -164,7 +164,7 @@ JupyterLab will launch directly with the containerized LUMI-IQ environment activ
 
 ## 2. Centralized Project Configuration (`LEXIS_PROJECT` & `LUMI_PROJECT`)
 
-You can set and switch your **LEXIS project allocation** (e.g. `vlq_demo_project`) and **LUMI Slurm account** through multiple flexible methods. The system automatically resolves configuration settings according to the following priority order:
+You can set and switch your **LEXIS project allocation** (e.g. `your_vlq_project`) and **LUMI Slurm account** through multiple flexible methods. The system automatically resolves configuration settings according to the following priority order:
 
 1. **Active Shell Environment Variables** (`export LEXIS_PROJECT=...`) — *Highest Priority*
 2. **Local `.env` file** in the task directory
@@ -175,11 +175,11 @@ You can set and switch your **LEXIS project allocation** (e.g. `vlq_demo_project
 ### Method A: Direct Shell Environment Variable (Fastest & Recommended)
 Switch your LEXIS project immediately in your current terminal session:
 ```bash
-export LEXIS_PROJECT=vlq_demo_project
+export LEXIS_PROJECT=your_vlq_project
 ```
 To persist this across all future SSH / login sessions on LUMI, add it to your `~/.bashrc`:
 ```bash
-echo 'export LEXIS_PROJECT=vlq_demo_project' >> ~/.bashrc
+echo 'export LEXIS_PROJECT=your_vlq_project' >> ~/.bashrc
 ```
 
 ### Method B: Global User Configuration (`~/.lumi-iq/config`)
@@ -191,7 +191,7 @@ cat << 'EOF' > ~/.lumi-iq/config
 LUMI_PROJECT=your_lumi_project_id
 
 # LEXIS Platform project short name and QPU backend
-LEXIS_PROJECT=vlq_demo_project
+LEXIS_PROJECT=your_vlq_project
 LEXIS_RESOURCE=VLQ-CZ
 EOF
 ```
@@ -201,12 +201,12 @@ For local development within the task directory:
 ```bash
 cp .env.example .env
 # Edit .env to set:
-# LEXIS_PROJECT=vlq_demo_project
+# LEXIS_PROJECT=your_vlq_project
 ```
 
 ### Method D: Pass `--project` directly to `auth.py`
 ```bash
-python auth.py --project vlq_demo_project
+python auth.py --project your_vlq_project
 ```
 All scripts (`submit_job.py`, `auth.py`, `vlq_bell_state.py`, `run_all_tests.sh`, and all 5 use cases) automatically read these settings through `config.py`.
 

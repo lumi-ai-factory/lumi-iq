@@ -176,7 +176,7 @@ def run_qiskit_repetition_qec(backend_target="SIM", shots=1024):
             return {"status": "FAIL", "reason": "Missing qaas/py4lexis"}
 
         lexis_token = os.environ.get("LEXIS_TOKEN")
-        lexis_project = os.environ.get("LEXIS_PROJECT", "vlq_demo_project")
+        lexis_project = os.environ.get("LEXIS_PROJECT", "your_vlq_project")
 
         if not lexis_token:
             token_path = os.path.expanduser("~/.lumi-iq/token")

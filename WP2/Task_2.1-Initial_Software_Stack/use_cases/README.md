@@ -52,7 +52,7 @@ cd ../04_qml_time_series && python run_time_series_forecasting.py --backend SIM
 
 # 3. Or submit directly to real VLQ hardware:
 # Set your allocated LEXIS project and authenticate once:
-export LEXIS_PROJECT=vlq_demo_project
+export LEXIS_PROJECT=your_vlq_project
 python ../../auth.py
 
 # Execute use cases on VLQ (uses ~/.lumi-iq/token automatically):
