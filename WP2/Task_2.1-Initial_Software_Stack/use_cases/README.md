@@ -44,13 +44,18 @@ All four use cases use the single unified `Lumi-IQ-qaas/VLQ` environment module.
 module use $HOME/modulefiles
 module load Lumi-IQ-qaas/VLQ
 
-# 2. Run on local simulator (fast test):
+# 2. Run on local simulator (fast test, no credentials required):
 cd WP2/Task_2.1-Initial_Software_Stack/use_cases/01_car_manufacturing && python run_car_manufacturing.py --backend SIM
 cd ../02_health_life_science && python run_health_vqe.py --backend SIM
 cd ../03_terrestrial_network && python run_terrestrial_network.py --backend SIM
 cd ../04_qml_time_series && python run_time_series_forecasting.py --backend SIM
 
-# 3. Or submit directly to real VLQ hardware (uses ~/.lumi-iq/token automatically):
+# 3. Or submit directly to real VLQ hardware:
+# Set your allocated LEXIS project and authenticate once:
+export LEXIS_PROJECT=vlq_demo_project
+python ../../auth.py
+
+# Execute use cases on VLQ (uses ~/.lumi-iq/token automatically):
 python run_car_manufacturing.py --backend VLQ
 python run_health_vqe.py --backend VLQ --shots 256
 python run_terrestrial_network.py --backend VLQ --shots 1024

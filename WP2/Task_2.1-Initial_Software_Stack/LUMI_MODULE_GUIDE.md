@@ -87,11 +87,18 @@ module load Lumi-IQ-qaas/VLQ
 # Verify:
 which python
 python -c 'import qaas, py4lexis, iqm.qiskit_iqm; print("LUMI-IQ Active!")'
+
+# Configure LEXIS project allocation (e.g. vlq_demo_project):
+export LEXIS_PROJECT=vlq_demo_project
+
+# Authenticate once via browser (OAuth 2.0 Device Flow, saves to ~/.lumi-iq/token):
+python auth.py
 ```
 
-To make this persistent for every login session:
+To make module loading and project export persistent for every login session:
 ```bash
 echo "module use /project/<your_project_id>/modulefiles" >> ~/.bashrc
+echo "export LEXIS_PROJECT=vlq_demo_project" >> ~/.bashrc
 ```
 
 ### 2. In Slurm Batch Scripts (`#SBATCH`):
@@ -108,7 +115,10 @@ module purge
 module use /project/<your_project_id>/modulefiles
 module load Lumi-IQ-qaas/VLQ
 
-# Run quantum workflow
+# Configure LEXIS project allocation
+export LEXIS_PROJECT=vlq_demo_project
+
+# Run quantum workflow (reads token automatically from ~/.lumi-iq/token)
 python submit_job.py --use-case 2 --backend VLQ
 ```
 
