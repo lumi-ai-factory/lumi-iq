@@ -113,12 +113,13 @@ def print_modules_listing(full=False):
     print("               LUMI-IQ ENVIRONMENT MODULES: DISCOVERY & STATUS")
     print("=" * 80)
     
-    if loaded:
-        print("  Currently Loaded Module(s):")
-        for m in loaded:
+    iq_loaded = [m for m in loaded if "lumi-iq" in m.lower() or "lumiiq" in m.lower()]
+    if iq_loaded:
+        print("  Active LUMI-IQ Module(s):")
+        for m in iq_loaded:
             print(f"    -> [ ACTIVE ] {m}")
     else:
-        print("  Currently Loaded Module(s): None detected in current shell session.")
+        print("  Active LUMI-IQ Module(s): None detected in current shell session.")
 
     print("-" * 80)
     print("  Available Modules on System:")
@@ -216,8 +217,9 @@ def run_tests(flavor, verbose=False):
     
     # Active modules summary
     loaded = get_loaded_modules()
-    if loaded:
-        print(f"  Active Module(s) : {', '.join(loaded)}")
+    iq_loaded = [m for m in loaded if "lumi-iq" in m.lower() or "lumiiq" in m.lower()]
+    if iq_loaded:
+        print(f"  Active Module(s) : {', '.join(iq_loaded)}")
     print("-" * 80)
 
     # Determine core tool suite based on flavor
