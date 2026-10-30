@@ -78,8 +78,13 @@ def find_available_modules():
                         rel = os.path.relpath(os.path.join(root, f), base)
                         mod_name = rel[:-4]
                         full_path = os.path.join(root, f)
-                        if mod_name not in found:
-                            found[mod_name] = full_path
+                        # Filter strictly to LUMI-IQ modules
+                        if "lumi-iq" not in mod_name.lower() and "lumiiq" not in full_path.lower():
+                            continue
+                        origin = "User" if base.startswith(os.path.expanduser("~")) else "Shared"
+                        display_name = f"{mod_name} [{origin}]"
+                        if display_name not in found:
+                            found[display_name] = (full_path, mod_name, origin)
     return found
 
 def get_loaded_modules():
@@ -121,15 +126,15 @@ def print_modules_listing(full=False):
         print("    [ INFO ] No pre-configured modulefiles found in standard paths.")
         print("             Run 'module use /appl/local/lumiiq/modulefiles' on LUMI.")
     else:
-        for name, path in sorted(modules.items()):
-            is_active = any(name.lower() in l.lower() for l in loaded)
+        for display_name, (path, mod_name, origin) in sorted(modules.items()):
+            is_active = any(mod_name.lower() in l.lower() for l in loaded)
             status = "[ ACTIVE ]" if is_active else "[ AVAIL  ]"
             desc = ""
-            if "vlq" in name.lower():
+            if "vlq" in mod_name.lower():
                 desc = "Physical VLQ 24-Qubit Star QPU execution"
-            elif "sim" in name.lower():
+            elif "sim" in mod_name.lower():
                 desc = "High-performance local CPU/GPU simulation"
-            print(f"    {status}  {name:<24} | {desc}")
+            print(f"    {status}  {display_name:<30} | {desc}")
             if full:
                 print(f"                Path: {path}")
 
@@ -179,7 +184,7 @@ def check_tool(name, mod, desc):
     elif name == "IQM Qubit Selector":
         candidates = ["iqm.qubit_selector", "iqm.qubit_selector.qubit_selector"]
     elif name == "IQM Error Reduction Tools":
-        candidates = ["iqm.error_reduction_tools", "iqm.error_reduction"]
+        candidates = ["iqm_error_reduction_tools", "iqm.error_reduction_tools", "iqm.error_reduction"]
     elif name == "IQM QAOA":
         candidates = ["iqm_qaoa", "qiskit_algorithms.minimum_eigensolvers.qaoa"]
 

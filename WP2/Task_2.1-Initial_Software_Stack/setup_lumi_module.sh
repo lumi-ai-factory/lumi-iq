@@ -12,6 +12,12 @@ set -euo pipefail
 ENV_DIR="${1:-$HOME/lumi-iq-env}"
 MODULE_ROOT="${2:-${HOME}/modulefiles}"
 IS_SHARED="${3:-false}"
+RECIPE_FILE="${4:-}"
+
+IS_SIM=false
+if [[ "$ENV_DIR" == *"sim"* || "$RECIPE_FILE" == *"sim"* ]]; then
+    IS_SIM=true
+fi
 
 MODULE_DIR="${MODULE_ROOT}/Lumi-IQ-qaas"
 
@@ -66,6 +72,7 @@ if mkdir -p "$USER_KERNEL_DIR" 2>/dev/null; then
 fi
 
 # 3. Generate Primary Modulefile: Lumi-IQ-qaas/VLQ.lua
+if [ "$IS_SIM" = "false" ] || [ ! -f "$MODULE_DIR/VLQ.lua" ]; then
 cat <<EOF > "$MODULE_DIR/VLQ.lua"
 -- -*- lua -*-
 -- =============================================================================
@@ -102,8 +109,10 @@ prepend_path("JUPYTER_PATH", pathJoin(env_root, "share/jupyter"))
 setenv("LUMI_IQ_ENV", env_root)
 setenv("LUMI_IQ_BACKEND", "VLQ")
 EOF
+fi
 
 # 3b. Generate Simulator Modulefile: Lumi-IQ-qaas/SIM.lua
+if [ "$IS_SIM" = "true" ] || [ ! -f "$MODULE_DIR/SIM.lua" ]; then
 cat <<EOF > "$MODULE_DIR/SIM.lua"
 -- -*- lua -*-
 -- =============================================================================
@@ -140,6 +149,7 @@ prepend_path("JUPYTER_PATH", pathJoin(env_root, "share/jupyter"))
 setenv("LUMI_IQ_ENV", env_root)
 setenv("LUMI_IQ_BACKEND", "SIM")
 EOF
+fi
 
 # 4. Create default symlink for Lmod (default to VLQ)
 ln -sf "VLQ.lua" "$MODULE_DIR/default"

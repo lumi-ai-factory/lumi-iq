@@ -78,5 +78,5 @@ echo "=== Tykky Container Built Successfully! ==="
 # 3. Automatically configure Lmod module
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [ -f "$SCRIPT_DIR/setup_lumi_module.sh" ]; then
-    bash "$SCRIPT_DIR/setup_lumi_module.sh" "$TARGET_DIR" "$MODULE_ROOT" "$IS_SHARED"
+    bash "$SCRIPT_DIR/setup_lumi_module.sh" "$TARGET_DIR" "$MODULE_ROOT" "$IS_SHARED" "$ENV_FILE"
 fi
