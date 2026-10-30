@@ -154,6 +154,9 @@ fi
 # 4. Create default symlink for Lmod (default to VLQ)
 ln -sf "VLQ.lua" "$MODULE_DIR/default"
 
+# 5. Create alias symlink so both 'Lumi-IQ/SIM' and 'Lumi-IQ-qaas/SIM' are supported
+ln -sf "Lumi-IQ-qaas" "$MODULE_ROOT/Lumi-IQ"
+
 # 6. Apply shared permissions if requested
 if [ "$IS_SHARED" = "true" ] || [ "$IS_SHARED" = "1" ]; then
     echo "Applying shared permissions (g+rX, o+rX)..."
