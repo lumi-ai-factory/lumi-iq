@@ -91,15 +91,16 @@ def print_banner(backend):
 # -----------------------------------------------------------------------------
 # TEST 1: Software Stack & Environment
 # -----------------------------------------------------------------------------
-def test_software_stack():
+def test_software_stack(backend_target="SIM"):
     start_time = time.time()
     print(f"{BOLD}[TEST 1/8] Verifying Software Stack & Python Environment...{RESET}")
 
+    is_vlq = (backend_target == "VLQ")
     packages = [
         ("qiskit", "Core Quantum SDK", True),
         ("qiskit_aer", "High-performance Simulator", True),
-        ("qaas", "IT4I QaaS QPU Client", True),
-        ("py4lexis", "LEXIS AAI & Orchestration", True),
+        ("qaas", "IT4I QaaS QPU Client", is_vlq),
+        ("py4lexis", "LEXIS AAI & Orchestration", is_vlq),
         ("numpy", "Numerical Computing", True),
         ("scipy", "Scientific Algorithms", True),
         ("matplotlib", "Visualization", True),
@@ -374,7 +375,7 @@ def main():
 
     # Stage 1: Software Stack
     if not args.skip_stack_check:
-        results.append(test_software_stack())
+        results.append(test_software_stack(args.backend))
 
     # Stage 2: LEXIS Authentication & Hardware Target
     results.append(test_lexis_authentication(args.backend))
