@@ -27,6 +27,7 @@ if [ ! -d "/pfs/lustrep1" ] && [ -d "./pfs/lustrep1/appl/local/lumiiq" ]; then
 fi
 
 DRY_RUN=false
+MULTI_LUSTRE=false
 SYNC_SUBDIR=""
 
 # Parse command line flags
@@ -34,6 +35,10 @@ while [[ $# -gt 0 ]]; do
     case "$1" in
         --dry-run|-n)
             DRY_RUN=true
+            shift
+            ;;
+        --multi-lustre|-m)
+            MULTI_LUSTRE=true
             shift
             ;;
         --software-only)
@@ -60,6 +65,7 @@ while [[ $# -gt 0 ]]; do
             echo "Usage: $0 [OPTIONS]"
             echo "Options:"
             echo "  --dry-run, -n      Perform trial run with no changes made"
+            echo "  --multi-lustre, -m Synchronize across all LUMI Lustre partitions (lustrep1..4)"
             echo "  --software-only    Sync only the software/ container directory"
             echo "  --modules-only     Sync only modulefiles/"
             echo "  --scripts-only     Sync only scripts/"
@@ -128,18 +134,34 @@ rsync $RSYNC_FLAGS "$SRC_PATH" "$DST_PATH" || {
     fi
 }
 
-# 4. Enforce strict permissions (Group + World Read/Execute)
+# 4. Enforce strict permissions (Group + World Read/Execute, No World Write)
 if [ "$DRY_RUN" = "false" ]; then
-    echo -e "${BOLD}Enforcing permissions (g+rX, o+rX)...${RESET}"
-    chmod -R g+rX,o+rX "$TARGET_ROOT" 2>/dev/null || true
+    echo -e "${BOLD}Enforcing permissions (a+rX, o-w, g+rX)...${RESET}"
+    chmod -R a+rX "$TARGET_ROOT" 2>/dev/null || true
+    chmod -R o-w "$TARGET_ROOT" 2>/dev/null || true
 
     # Attempt to set project group if available
-    for grp in "lumiiq" "${LUMI_PROJECT:-}"; do
+    for grp in "appl_iq" "lumiiq" "${LUMI_PROJECT:-}"; do
         if [ -n "$grp" ] && getent group "$grp" &>/dev/null 2>&1; then
             chgrp -R "$grp" "$TARGET_ROOT" 2>/dev/null || true
             break
         fi
     done
+fi
+
+# 5. Multi-Lustre Partition Replication (lustrep1..4)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SYNC_MULTI="$SCRIPT_DIR/sync_multi_lustre.sh"
+
+if [ "$MULTI_LUSTRE" = "true" ] || ([ -d "/pfs/lustrep2" ] && [[ "$TARGET_ROOT" == *"/appl/local/lumiiq"* || "$TARGET_ROOT" == *"/pfs/lustrep1/appl/local/lumiiq"* ]]); then
+    if [ -f "$SYNC_MULTI" ]; then
+        echo -e "\n${BOLD}${CYAN}Replicating across all LUMI Lustre partitions (lustrep1..4)...${RESET}"
+        if [ "$DRY_RUN" = "true" ]; then
+            bash "$SYNC_MULTI" --yes --dry-run
+        else
+            bash "$SYNC_MULTI" --yes
+        fi
+    fi
 fi
 
 echo -e "${BOLD}${GREEN}======================================================================${RESET}"
