@@ -142,26 +142,33 @@ Researchers can launch interactive Jupyter notebooks via the web portal:
 The official system-wide LUMI-IQ application directory on LUMI is configured at:
 * **Production Runtime Path:** `/appl/local/lumiiq/`
 * **Lustre Staging & Build Root:** `/pfs/lustrep1/appl/local/lumiiq/`
-* **Sync Script:** `/appl/local/lumiiq/scripts/sync_to_appl.sh` (mirrored from `/pfs/lustrep1/appl/local/lumiiq/scripts/`)
+* **Sync Scripts:** `/appl/local/lumiiq/scripts/sync_multi_lustre.sh` (multi-Lustre sync) & `sync_to_appl.sh`
 
 ### Automated Staging, Build & Sync Workflow:
-1. **End-to-End Automated Deployment**:
+1. **One-Time End-to-End Automated Deployment (Build + Multi-Partition Sync)**:
    ```bash
-   bash /appl/local/lumiiq/scripts/deploy_to_lumiiq.sh --all
+   bash modules/scripts/deploy_module.sh --appl --build --recipe modules/recipes/env-initial.yml
    ```
 
-2. **Manual Step-by-Step Deployment (System Maintainers)**:
+2. **One-Time Cluster Partition Synchronization (Across lustrep1..4)**:
    ```bash
-   # Step A: Build Tykky container in Lustre staging
-   bash /appl/local/lumiiq/scripts/build_container_module.sh \
-       /pfs/lustrep1/appl/local/lumiiq/software/lumi-iq-env \
-       env.yml
+   bash modules/scripts/sync_multi_lustre.sh -y
+   ```
 
-   # Step B: Synchronize Lustre staging to system /appl/local
-   bash /appl/local/lumiiq/scripts/sync_to_appl.sh
+3. **Manual Step-by-Step Deployment (System Maintainers)**:
+   ```bash
+   # Step A: Build Tykky container in Lustre staging (/pfs/lustrep1)
+   bash modules/scripts/build_module.sh \
+       /pfs/lustrep1/appl/local/lumiiq/software/lumi-iq-env \
+       modules/recipes/env-initial.yml
+
+   # Step B: Synchronize Lustre staging across all partitions (lustrep1..4) & enforce permissions
+   bash modules/scripts/sync_multi_lustre.sh -y
+   # Alternatively:
+   bash modules/scripts/sync_to_appl.sh --multi-lustre
 
    # Step C: Verify deployment
-   bash /appl/local/lumiiq/scripts/verify_module.sh
+   bash modules/scripts/verify_module.sh /appl/local/lumiiq
    ```
 
 3. **Lmod Module Structure (`/appl/local/lumiiq/modulefiles`)**:

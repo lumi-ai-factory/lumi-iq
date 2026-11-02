@@ -39,6 +39,7 @@ lumi-iq/
 │   ├── scripts/                                 # Maintenance, build & synchronization scripts
 │   │   ├── build_module.sh                      # Tykky (conda-containerize) container builder
 │   │   ├── sync_to_appl.sh                      # Lustre (/pfs/lustrep1) -> /appl/local sync script
+│   │   ├── sync_multi_lustre.sh                 # Multi-Lustre parallel sync (lustrep1 -> lustrep2..4)
 │   │   ├── deploy_module.sh                     # Master orchestrator (--appl | --project <ID> | --user)
 │   │   └── verify_module.sh                     # Smoke test & verification script
 │   └── kernel/                                  # JupyterLab Open OnDemand configuration
@@ -180,14 +181,14 @@ python submit_job.py --use-case all --backend VLQ
 To deploy or update the central `/appl/local/lumiiq` software module on LUMI:
 
 ```bash
-# 1. Full end-to-end automated build, sync, and verification:
+# 1. One-time full end-to-end build, install, and multi-Lustre sync across partitions (lustrep1..4):
 bash modules/scripts/deploy_module.sh --appl --build --recipe modules/recipes/env-initial.yml
 
-# 2. Or user-space test build:
-bash modules/scripts/deploy_module.sh --user --build --recipe modules/recipes/env-initial.yml
+# 2. One-time multi-partition sync only (lustrep1 -> lustrep2, lustrep3, lustrep4):
+bash modules/scripts/sync_multi_lustre.sh -y
 
-# 3. Synchronize Lustre staging to system /appl/local:
-bash modules/scripts/sync_to_appl.sh
+# 3. Or user-space test build:
+bash modules/scripts/deploy_module.sh --user --build --recipe modules/recipes/env-initial.yml
 
 # 4. Verify installation and module imports:
 bash modules/scripts/verify_module.sh

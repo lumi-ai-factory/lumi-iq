@@ -37,6 +37,7 @@ modules/
 ├── scripts/                       # Deployment and maintenance scripts
 │   ├── build_module.sh           # Tykky containerization (conda-containerize)
 │   ├── sync_to_appl.sh           # Lustre (/pfs/lustrep1) -> /appl/local synchronization
+│   ├── sync_multi_lustre.sh      # Parallel Multi-Lustre sync (lustrep1 -> lustrep2..4)
 │   ├── deploy_module.sh          # Master orchestrator (--appl | --project <ID> | --user)
 │   └── verify_module.sh          # Installation smoke test & verification suite
 └── kernel/                        # JupyterLab configuration

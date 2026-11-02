@@ -132,10 +132,16 @@ if [ -d "/pfs/lustrep1/appl/local/lumiiq" ] && [[ "$SHARED_ROOT" == *"/pfs/lustr
     echo "Executing Automatic Cluster Synchronization across Lustre Partitions..."
     echo "======================================================================"
 
-    SYNC_SCRIPT="/pfs/lustrep1/appl/local/lumiiq/scripts/sync_appl_quantum.sh"
+    SYNC_SCRIPT="/pfs/lustrep1/appl/local/lumiiq/scripts/sync_multi_lustre.sh"
+    if [ ! -f "$SYNC_SCRIPT" ] && [ -f "$SCRIPT_DIR/../../modules/scripts/sync_multi_lustre.sh" ]; then
+        SYNC_SCRIPT="$SCRIPT_DIR/../../modules/scripts/sync_multi_lustre.sh"
+    fi
+    if [ ! -f "$SYNC_SCRIPT" ] && [ -f "/pfs/lustrep1/appl/local/lumiiq/scripts/sync_appl_quantum.sh" ]; then
+        SYNC_SCRIPT="/pfs/lustrep1/appl/local/lumiiq/scripts/sync_appl_quantum.sh"
+    fi
     if [ -f "$SYNC_SCRIPT" ]; then
         echo "Triggering official cluster sync ($SYNC_SCRIPT)..."
-        echo "1" | bash "$SYNC_SCRIPT" 2>/dev/null || true
+        echo "1" | bash "$SYNC_SCRIPT" -y 2>/dev/null || echo "1" | bash "$SYNC_SCRIPT" 2>/dev/null || true
     fi
 
     # Ensure sync to destinations: lustrep2, lustrep3, lustrep4
@@ -147,7 +153,7 @@ if [ -d "/pfs/lustrep1/appl/local/lumiiq" ] && [[ "$SHARED_ROOT" == *"/pfs/lustr
             rsync -rlptDvh --delete "$SHARED_SW_DIR/" "$dest/software/lumi-iq-env/" 2>/dev/null || true
             rsync -rlptDvh --delete "$SHARED_MODULE_ROOT/" "$dest/modulefiles/" 2>/dev/null || true
             chgrp -R appl_iq "$dest" 2>/dev/null || true
-            chmod -R g+rwX,o+rX "$dest" 2>/dev/null || true
+            chmod -R a+rX,o-w "$dest" 2>/dev/null || true
         fi
     done
 
@@ -157,7 +163,7 @@ if [ -d "/pfs/lustrep1/appl/local/lumiiq" ] && [[ "$SHARED_ROOT" == *"/pfs/lustr
         rsync -rlptDvh --delete "$SHARED_SW_DIR/" "/appl/local/lumiiq/software/lumi-iq-env/" 2>/dev/null || true
         rsync -rlptDvh --delete "$SHARED_MODULE_ROOT/" "/appl/local/lumiiq/modulefiles/" 2>/dev/null || true
         chgrp -R appl_iq "/appl/local/lumiiq" 2>/dev/null || true
-        chmod -R g+rwX,o+rX "/appl/local/lumiiq" 2>/dev/null || true
+        chmod -R a+rX,o-w "/appl/local/lumiiq" 2>/dev/null || true
     fi
 
     echo "======================================================================"
