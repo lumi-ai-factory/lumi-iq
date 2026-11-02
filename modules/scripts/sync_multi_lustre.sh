@@ -99,29 +99,27 @@ if [ "$DRY_RUN" = "true" ]; then
     RSYNC_OPTS="$RSYNC_OPTS --dry-run"
 fi
 
-# 1. Sync the software installation in parallel
-directory='software'
-echo -e "\n${BOLD}Synchronizing '$directory' across Lustre partitions in parallel...${RESET}"
-for i in "${!destinations[@]}"; do
-    if [ "$DRY_RUN" = "false" ]; then
-        mkdir -p "${destinations[$i]}/$directory" 2>/dev/null || true
-    fi
-    rsync $RSYNC_OPTS "$main_appl/$directory/" "${destinations[$i]}/$directory/" >& "$logdir/${dest_short[$i]}_software_$logfile" &
-done
-wait
-echo -e "${GREEN}Software sync completed across all partitions.${RESET}"
+# Determine directories to synchronize
+sync_dirs=( 'software' 'modulefiles' )
+if [ -d "$main_appl/lumi-iq" ]; then
+    sync_dirs+=( 'lumi-iq' )
+fi
+if [ -d "$main_appl/scripts" ]; then
+    sync_dirs+=( 'scripts' )
+fi
 
-# 2. Sync the modulefiles in parallel
-directory='modulefiles'
-echo -e "\n${BOLD}Synchronizing '$directory' across Lustre partitions in parallel...${RESET}"
-for i in "${!destinations[@]}"; do
-    if [ "$DRY_RUN" = "false" ]; then
-        mkdir -p "${destinations[$i]}/$directory" 2>/dev/null || true
-    fi
-    rsync $RSYNC_OPTS "$main_appl/$directory/" "${destinations[$i]}/$directory/" >& "$logdir/${dest_short[$i]}_modulefiles_$logfile" &
+# Execute synchronization per directory across partitions in parallel
+for directory in "${sync_dirs[@]}"; do
+    echo -e "\n${BOLD}Synchronizing '$directory' across Lustre partitions in parallel...${RESET}"
+    for i in "${!destinations[@]}"; do
+        if [ "$DRY_RUN" = "false" ]; then
+            mkdir -p "${destinations[$i]}/$directory" 2>/dev/null || true
+        fi
+        rsync $RSYNC_OPTS "$main_appl/$directory/" "${destinations[$i]}/$directory/" >& "$logdir/${dest_short[$i]}_${directory}_$logfile" &
+    done
+    wait
+    echo -e "${GREEN}Sync for '$directory' completed across all partitions.${RESET}"
 done
-wait
-echo -e "${GREEN}Modulefiles sync completed across all partitions.${RESET}"
 
 # 3. Enforce Permissions (Readable by ALL users, no write for others)
 if [ "$DRY_RUN" = "false" ]; then
