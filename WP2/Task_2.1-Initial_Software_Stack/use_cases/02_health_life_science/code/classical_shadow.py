@@ -149,20 +149,14 @@ def calculate_snapshots(
         if report_per_job_progress:
             print(f'Running job {i//batch_size + 1} of {((N-1)//batch_size) + 1}... on backend {backend.name}. Job ID: {job.job_id()}')
 
-        time_taken = 0
-
         if not is_simulation:
-            while not is_job_done(job):
-                sleep(2)
-                time_taken += 2
-                if time_taken % 30 == 0:
-                    status_str = job.status() if hasattr(job, "status") else "RUNNING"
-                    print(f'Job {job.job_id()} is still running after {time_taken} seconds... (status: {status_str})')
-                if time_taken > 1800:
-                    print(f'Warning: Job {job.job_id()} exceeded timeout (30m). Calling result().')
-                    break
+            print(f'Awaiting execution of Job {job.job_id()} on {backend.name}...')
             
-        results = job.result().get_counts()
+        try:
+            results = job.result(qiskit_legacy=True).get_counts()
+        except (TypeError, AttributeError):
+            res = job.result()
+            results = res.get_counts() if hasattr(res, "get_counts") else [r.data.meas.get_counts() for r in res]
         # get_counts returns a bare dict instead of a list when only one circuit was run,
         # which happens whenever the last batch holds a single circuit
         if isinstance(results, dict):

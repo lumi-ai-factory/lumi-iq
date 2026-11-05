@@ -235,17 +235,8 @@ def evaluate_energy(
     if report_per_job_progress:
         print(f'Job {job.job_id()} submitted to backend {backend.name}')
 
-    time_taken = 0
     if not is_simulation:
-        while not is_job_done(job):
-            sleep(2)
-            time_taken += 2
-            if time_taken % 30 == 0:
-                status_str = job.status() if hasattr(job, "status") else "RUNNING"
-                print(f'Job {job.job_id()} is still running after {time_taken} seconds... (status: {status_str})')
-            if time_taken > 1800:
-                print(f'Warning: Job {job.job_id()} exceeded timeout (30m). Calling result().')
-                break
+        print(f'Awaiting execution of Job {job.job_id()} on {backend.name}...')
 
     # Decode the counts of each parameter set separately
     try:
