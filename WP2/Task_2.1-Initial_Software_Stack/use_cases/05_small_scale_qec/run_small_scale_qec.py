@@ -202,8 +202,6 @@ def run_qiskit_repetition_qec(backend_target="SIM", shots=1024):
         print(f"  Transpiling 5-qubit repetition circuit for VLQ Star-topology native basis gates (CZ, PRX)...")
         t_qc = transpile(qc, backend=backend, optimization_level=1)
         job = backend.run(t_qc, shots=shots, job_name="uc5_small_scale_qec")
-        while not job.in_final_state():
-            time.sleep(1)
         try:
             result = job.result(qiskit_legacy=True)
             counts = result.get_counts()

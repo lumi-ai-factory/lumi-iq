@@ -5,23 +5,12 @@ import warnings
 warnings.filterwarnings("ignore", message=".*IProgress not found.*")
 
 try:
-    try:
-        from qheappe_client import QProvider, QBackend, QJob
-    except ImportError:
-        from qaas.client import QProvider, QBackend, QJob
-    if QJob is not None:
-        if not hasattr(QJob, "is_final_state"):
-            def _qjob_is_final_state(self):
-                try:
-                    st = str(self.status()).upper()
-                    return any(term in st for term in ["DONE", "COMPLETED", "ERROR", "CANCEL", "FAIL"])
-                except Exception:
-                    return False
-            QJob.is_final_state = _qjob_is_final_state
-        if not hasattr(QJob, "in_final_state"):
-            QJob.in_final_state = QJob.is_final_state
+    from qheappe_client import QProvider, QBackend, QJob
 except ImportError:
-    QProvider, QBackend, QJob = None, None, None
+    try:
+        from qaas.client import QProvider, QBackend, QJob
+    except ImportError:
+        QProvider, QBackend, QJob = None, None, None
 
 import argparse
 import numpy as np
