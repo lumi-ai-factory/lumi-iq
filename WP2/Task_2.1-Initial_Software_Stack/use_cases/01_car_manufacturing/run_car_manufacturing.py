@@ -18,6 +18,7 @@ os.environ.setdefault("MPLCONFIGDIR", os.path.join(tempfile.gettempdir(), "matpl
 
 import warnings
 warnings.filterwarnings("ignore", message=".*IProgress not found.*")
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 import numpy as np
 import matplotlib
@@ -172,10 +173,10 @@ def main():
         print(f"Awaiting QPU execution results (timeout: 600s)...")
 
         try:
-            result = job.result(timeout_secs=600, qiskit_legacy=True)
+            result = job.result(qiskit_legacy=True)
             counts = result.get_counts()
         except (TypeError, AttributeError):
-            result = job.result(timeout_secs=600)
+            result = job.result()
             counts = result.get_counts() if hasattr(result, "get_counts") else [r.data.meas.get_counts() for r in result]
         if isinstance(counts, dict):
             counts = [counts]

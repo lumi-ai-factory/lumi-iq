@@ -282,10 +282,10 @@ def test_core_bell_state(backend_target, shots=1024):
             job = backend.run(t_qc, shots=shots, job_name="test_bell_state")
             print(f"  Job {job.job_id()} queued. Waiting for completion...")
             try:
-                result = job.result(timeout_secs=600, qiskit_legacy=True)
+                result = job.result(qiskit_legacy=True)
                 counts = result.get_counts()
             except (TypeError, AttributeError):
-                result = job.result(timeout_secs=600)
+                result = job.result()
                 counts = result.get_counts() if hasattr(result, "get_counts") else result[0].data.meas.get_counts()
             dur = time.time() - start_time
             print(f"  ✓ VLQ QPU measurements: {counts}")

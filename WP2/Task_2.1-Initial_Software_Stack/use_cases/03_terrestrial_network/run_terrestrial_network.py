@@ -200,10 +200,10 @@ def main():
         print("Awaiting QPU measurement execution...")
 
         try:
-            result = job.result(timeout_secs=600, qiskit_legacy=True)
+            result = job.result(qiskit_legacy=True)
             counts = result.get_counts()
         except (TypeError, AttributeError):
-            result = job.result(timeout_secs=600)
+            result = job.result()
             counts = result.get_counts() if hasattr(result, "get_counts") else result[0].data.meas.get_counts()
         print(f"\n[VLQ SUCCESS] Received measurements from VLQ QPU!")
 
