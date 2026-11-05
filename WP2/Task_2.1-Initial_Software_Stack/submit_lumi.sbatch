@@ -37,12 +37,23 @@ module use /appl/local/lumiiq/modulefiles 2>/dev/null || true
 module use "$HOME/modulefiles" 2>/dev/null || true
 
 # 2. Load the LUMI-IQ environment (SIM or VLQ)
-TARGET_BACKEND="${LUMI_IQ_BACKEND:-${TARGET_BACKEND:-SIM}}"
+if [ -z "${TARGET_BACKEND:-}" ] && [ -n "${LUMI_IQ_BACKEND:-}" ]; then
+    TARGET_BACKEND="$LUMI_IQ_BACKEND"
+fi
+if [ -z "${TARGET_BACKEND:-}" ]; then
+    if [[ "${TARGET_ARGS:-}" == *"VLQ"* ]]; then
+        TARGET_BACKEND="VLQ"
+    else
+        TARGET_BACKEND="SIM"
+    fi
+fi
+
 if [ "$TARGET_BACKEND" = "VLQ" ]; then
-    if module is-avail Lumi-IQ-qaas/VLQ 2>/dev/null; then
-        module load Lumi-IQ-qaas/VLQ
-    elif [ -d "$HOME/lumi-iq-env/bin" ]; then
-        export PATH="$HOME/lumi-iq-env/bin:$PATH"
+    module load Lumi-IQ-qaas/VLQ 2>/dev/null || true
+    if ! command -v python &>/dev/null || ! python -c "import qheappe_client" 2>/dev/null; then
+        if [ -d "$HOME/lumi-iq-env/bin" ]; then
+            export PATH="$HOME/lumi-iq-env/bin:$PATH"
+        fi
     fi
     # 3. Securely set LEXIS authentication token for VLQ QPU
     TOKEN_FILE="$HOME/.lumi-iq/token"
@@ -56,8 +67,9 @@ if [ "$TARGET_BACKEND" = "VLQ" ]; then
     fi
 else
     # Simulation mode (runs locally without credentials)
-    if module is-avail Lumi-IQ-qaas/SIM 2>/dev/null; then
-        module load Lumi-IQ-qaas/SIM
+    module load Lumi-IQ-qaas/SIM 2>/dev/null || module load Lumi-IQ-qaas/VLQ 2>/dev/null || true
+    if [ -d "$HOME/lumi-iq-sim/bin" ]; then
+        export PATH="$HOME/lumi-iq-sim/bin:$PATH"
     elif [ -d "$HOME/lumi-iq-env/bin" ]; then
         export PATH="$HOME/lumi-iq-env/bin:$PATH"
     fi
@@ -74,6 +86,7 @@ fi
 
 # 5. Execute the hybrid quantum workflow on LUMI compute node with QPU offload
 echo "Executing hybrid quantum workflow on LUMI compute node:"
+echo "Python : $(which python)"
 echo "Script : $TARGET_SCRIPT"
 echo "Args   : $TARGET_ARGS"
 echo "--------------------------------------------------------"

@@ -306,7 +306,7 @@ def main():
         f"--error={run_dir}/lumi_iq_%j.err",
         f"--time={slurm_time_str}",
         f"--deadline={deadline_iso}",
-        f"--export=ALL,TARGET_SCRIPT={target_script},TARGET_ARGS={target_args}",
+        f"--export=ALL,TARGET_BACKEND={args.backend},LUMI_IQ_BACKEND={args.backend},TARGET_SCRIPT={target_script},TARGET_ARGS={target_args}",
     ]
     if args.account and args.account.strip():
         cmd.insert(1, f"--account={args.account.strip()}")
