@@ -5,7 +5,10 @@ import warnings
 warnings.filterwarnings("ignore", message=".*IProgress not found.*")
 
 try:
-    from qaas.client import QProvider, QBackend, QJob
+    try:
+        from qheappe_client import QProvider, QBackend, QJob
+    except ImportError:
+        from qaas.client import QProvider, QBackend, QJob
     if QJob is not None:
         if not hasattr(QJob, "is_final_state"):
             def _qjob_is_final_state(self):
@@ -63,7 +66,11 @@ def get_backend(name: str) -> Backend:
             if getattr(provider, "_token", None):
                 save_lexis_token(provider._token)
 
-        backend: QBackend = provider.get_backend(LEXIS_RESOURCE)
+        backend_name = os.getenv("LEXIS_BACKEND", "VLQ")
+        try:
+            backend: QBackend = provider.get_backend(LEXIS_RESOURCE, backend_name=backend_name)
+        except TypeError:
+            backend: QBackend = provider.get_backend(LEXIS_RESOURCE)
         print(f"Backend '{backend.name}' successfully initialized (target: {LEXIS_RESOURCE}).")
     elif name == 'SIM':
         from qiskit_aer import AerSimulator

@@ -38,7 +38,7 @@ COMMON_CORE_TOOLS = [
 
 # Hardware-specific tools for physical VLQ offload (Table 11 Production Gateway)
 VLQ_HARDWARE_TOOLS = [
-    ("QaaS Client (Hardware VLQ)", "qaas", "Direct execution client on Czech National Quantum Computer"),
+    ("QaaS Client (Hardware VLQ)", "qheappe_client", "Direct execution client on Czech National Quantum Computer"),
     ("py4lexis (AAI Gateway)", "py4lexis", "LEXIS authentication and job staging gateway"),
 ]
 
@@ -166,10 +166,14 @@ def detect_flavor():
         return "vlq", f"Python executable path ({sys.executable})"
 
     try:
-        importlib.import_module("qaas")
-        return "vlq", "QaaS hardware client detected in Python environment"
+        importlib.import_module("qheappe_client")
+        return "vlq", "QaaS / QHEAppE hardware client detected in Python environment"
     except Exception:
-        return "sim", "Simulation baseline (QaaS hardware client not present)"
+        try:
+            importlib.import_module("qaas")
+            return "vlq", "QaaS hardware client detected in Python environment"
+        except Exception:
+            return "sim", "Simulation baseline (QaaS hardware client not present)"
 
 # ==============================================================================
 # TOOL VERIFICATION
@@ -188,6 +192,8 @@ def check_tool(name, mod, desc):
         candidates = ["iqm_error_reduction_tools", "iqm.error_reduction_tools", "iqm.error_reduction"]
     elif name == "IQM QAOA":
         candidates = ["iqm_qaoa", "qiskit_algorithms.minimum_eigensolvers.qaoa"]
+    elif name.startswith("QaaS Client"):
+        candidates = ["qheappe_client", "qaas"]
 
     last_err = None
     for c in candidates:

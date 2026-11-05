@@ -118,7 +118,7 @@ In addition to the primary all-in-one `Lumi-IQ-qaas` module, domain-specific mod
 #### Verifying Environment:
 ```bash
 which python
-python -c "import qiskit, qiskit_aer, qaas, py4lexis, pyscf, torch; print('LUMI-IQ environment ready!')"
+python -c "import qiskit, qiskit_aer, qheappe_client, qaas, py4lexis, pyscf, torch; print('LUMI-IQ environment ready!')"
 ```
 
 To make the module permanently available in every login shell:

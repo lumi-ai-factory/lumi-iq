@@ -169,7 +169,10 @@ def run_qiskit_repetition_qec(backend_target="SIM", shots=1024):
 
     elif backend_target.upper() == "VLQ":
         try:
-            from qaas.client import QProvider
+            try:
+                from qheappe_client import QProvider
+            except ImportError:
+                from qaas.client import QProvider
             from py4lexis.session import LexisSession
         except ImportError:
             print("  [ERROR] py4lexis / qaas client libraries missing for VLQ target.")
@@ -190,15 +193,23 @@ def run_qiskit_repetition_qec(backend_target="SIM", shots=1024):
 
         start_time = time.time()
         provider = QProvider(lexis_project=lexis_project, token=lexis_token)
-        backend = provider.get_backend("VLQ-CZ")
+        backend_name = os.environ.get("LEXIS_BACKEND", "VLQ")
+        try:
+            backend = provider.get_backend("VLQ-CZ", backend_name=backend_name)
+        except TypeError:
+            backend = provider.get_backend("VLQ-CZ")
         exec_target_name = f"Czech National QC ({backend.name} - 24 Qubits)"
         print(f"  Transpiling 5-qubit repetition circuit for VLQ Star-topology native basis gates (CZ, PRX)...")
         t_qc = transpile(qc, backend=backend, optimization_level=1)
         job = backend.run(t_qc, shots=shots, job_name="uc5_small_scale_qec")
         while not job.in_final_state():
             time.sleep(1)
-        result = job.result()
-        counts = result.get_counts()
+        try:
+            result = job.result(qiskit_legacy=True)
+            counts = result.get_counts()
+        except (TypeError, AttributeError):
+            result = job.result()
+            counts = result.get_counts() if hasattr(result, "get_counts") else result[0].data.meas.get_counts()
         exec_duration = time.time() - start_time
 
     else:

@@ -99,7 +99,6 @@ def test_software_stack(backend_target="SIM"):
     packages = [
         ("qiskit", "Core Quantum SDK", True),
         ("qiskit_aer", "High-performance Simulator", True),
-        ("qaas", "IT4I QaaS QPU Client", is_vlq),
         ("py4lexis", "LEXIS AAI & Orchestration", is_vlq),
         ("numpy", "Numerical Computing", True),
         ("scipy", "Scientific Algorithms", True),
@@ -119,6 +118,26 @@ def test_software_stack(backend_target="SIM"):
 
     installed = {}
     missing_required = []
+
+    # Verify QaaS client (modern qheappe_client or legacy qaas)
+    qaas_found = False
+    for candidate in ["qheappe_client", "qaas"]:
+        try:
+            m = __import__(candidate)
+            ver = getattr(m, "__version__", "installed")
+            installed[candidate] = ver
+            qaas_found = True
+            print(f"  ✓ {candidate:<24} : {ver:<12} (IT4I QaaS / QHEAppE Client)")
+            break
+        except Exception:
+            continue
+
+    if not qaas_found:
+        if is_vlq:
+            missing_required.append("qheappe_client")
+            print(f"  ✗ {'qheappe_client':<24} : {RED}MISSING (REQUIRED){RESET} (IT4I QaaS / QHEAppE Client)")
+        else:
+            print(f"  - {'qheappe_client':<24} : {YELLOW}Not Installed (Optional){RESET} (IT4I QaaS / QHEAppE Client)")
 
     for mod_name, desc, required in packages:
         try:
@@ -184,9 +203,16 @@ def test_lexis_authentication(backend_target):
     if token_valid:
         # Check backend connectivity if QProvider available
         try:
-            from qaas.client import QProvider
+            try:
+                from qheappe_client import QProvider
+            except ImportError:
+                from qaas.client import QProvider
             provider = QProvider(lexis_project=LEXIS_PROJECT, token=token)
-            backend = provider.get_backend(LEXIS_RESOURCE)
+            backend_name = os.getenv("LEXIS_BACKEND", "VLQ")
+            try:
+                backend = provider.get_backend(LEXIS_RESOURCE, backend_name=backend_name)
+            except TypeError:
+                backend = provider.get_backend(LEXIS_RESOURCE)
             print(f"  ✓ Connected to Hardware Target: {backend.name} (Resource: {LEXIS_RESOURCE})")
             return TestResult(2, "LEXIS Auth & QPU Target", LEXIS_RESOURCE, "PASS", dur, details_str)
         except Exception as e:
@@ -239,17 +265,28 @@ def test_core_bell_state(backend_target, shots=1024):
     elif backend_target == "VLQ":
         try:
             from config import LEXIS_PROJECT, LEXIS_RESOURCE, get_lexis_token
-            from qaas.client import QProvider
+            try:
+                from qheappe_client import QProvider
+            except ImportError:
+                from qaas.client import QProvider
             token = get_lexis_token()
             provider = QProvider(lexis_project=LEXIS_PROJECT, token=token)
-            backend = provider.get_backend(LEXIS_RESOURCE)
+            backend_name = os.getenv("LEXIS_BACKEND", "VLQ")
+            try:
+                backend = provider.get_backend(LEXIS_RESOURCE, backend_name=backend_name)
+            except TypeError:
+                backend = provider.get_backend(LEXIS_RESOURCE)
             print(f"  Transpiling for VLQ Star-topology native basis gates (CZ, PRX)...")
             t_qc = transpile(qc, backend=backend, optimization_level=1)
             print(f"  Submitting to VLQ ({shots} shots)...")
             job = backend.run(t_qc, shots=shots, job_name="test_bell_state")
             print(f"  Job {job.job_id()} queued. Waiting for completion...")
-            result = job.result(timeout_secs=600)
-            counts = result.get_counts()
+            try:
+                result = job.result(timeout_secs=600, qiskit_legacy=True)
+                counts = result.get_counts()
+            except (TypeError, AttributeError):
+                result = job.result(timeout_secs=600)
+                counts = result.get_counts() if hasattr(result, "get_counts") else result[0].data.meas.get_counts()
             dur = time.time() - start_time
             print(f"  ✓ VLQ QPU measurements: {counts}")
             return TestResult(3, "Core Bell State Benchmark", "VLQ", "PASS", dur, f"QPU Counts: {counts}")

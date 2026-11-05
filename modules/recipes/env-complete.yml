@@ -25,8 +25,8 @@ dependencies:
     - qiskit-nature
     - pyscf
     - py4lexis
-    - qaas==0.5.4
-    - py4heappe<4.0.0
+    - qaas[iqm_qiskit]==1.0.0a1
+    - py4heappe==3.1.*
     - torch
     - circuit-knitting-toolbox
     - qiskit-addon-aqc-tensor

@@ -1,6 +1,9 @@
 # --- Imports ---
 from py4lexis.session import LexisSession
-from qaas.client import QProvider, QBackend, QJob
+try:
+    from qheappe_client import QProvider, QBackend, QJob
+except ImportError:
+    from qaas.client import QProvider, QBackend, QJob
 
 import argparse
 import numpy as np
@@ -34,7 +37,10 @@ def get_backend(name: str) -> Backend:
         PROJECT = "VLQ-CSC"
         RESOURCE = "VLQ-FI"
         provider = QProvider(PROJECT, token)
-        backend:QBackend = provider.get_backend(RESOURCE)
+        try:
+            backend: QBackend = provider.get_backend(RESOURCE, backend_name="VLQ")
+        except TypeError:
+            backend: QBackend = provider.get_backend(RESOURCE)
         print(f'Backend {backend.name} initialized.')
     elif name == 'SIM':
         from qiskit_aer import AerSimulator

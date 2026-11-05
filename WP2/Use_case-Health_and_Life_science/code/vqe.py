@@ -248,7 +248,11 @@ def evaluate_energy(
                 break
 
     # Decode the counts of each parameter set separately
-    counts_list = job.result().get_counts()
+    try:
+        counts_list = job.result(qiskit_legacy=True).get_counts()
+    except (TypeError, AttributeError):
+        res = job.result()
+        counts_list = res.get_counts() if hasattr(res, "get_counts") else [r.data.meas.get_counts() for r in res]
     energies = energies_from_counts(
         counts_list, [terms for _, terms in groups], const, shots
     )

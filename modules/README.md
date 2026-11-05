@@ -31,7 +31,7 @@ modules/
 │       ├── sim.lua               # Error mitigation & Classical Shadows (Simulator target)
 │       └── default -> vlq.lua
 ├── recipes/                       # Pinned Conda/Pip environment definitions
-│   ├── env-initial.yml           # Baseline software stack (Python 3.12, Qiskit 2.x, QaaS 0.5.3)
+│   ├── env-initial.yml           # Baseline software stack (Python 3.12, Qiskit 2.x, QaaS 1.0.0a1 / QHEAppE Client)
 │   ├── env-complete.yml          # Consolidated All-in-One environment
 │   └── env-later-additions.yml   # Future extensions (PennyLane, BQSKit, MQT Predictor)
 ├── scripts/                       # Deployment and maintenance scripts

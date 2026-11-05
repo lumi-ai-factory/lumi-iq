@@ -65,7 +65,7 @@ if [ -x "$ENV_PATH/bin/python" ]; then
     run_check "Python executable runs" "$ENV_PATH/bin/python --version"
     run_check "Import Qiskit" "$ENV_PATH/bin/python -c 'import qiskit'"
     run_check "Import Qiskit-Aer" "$ENV_PATH/bin/python -c 'import qiskit_aer'"
-    run_check "Import QaaS Client" "$ENV_PATH/bin/python -c 'import qaas'"
+    run_check "Import QaaS / QHEAppE Client" "$ENV_PATH/bin/python -c 'import qheappe_client' || $ENV_PATH/bin/python -c 'import qaas'"
     run_check "Import Py4LEXIS" "$ENV_PATH/bin/python -c 'import py4lexis'"
     run_check "Import PySCF" "$ENV_PATH/bin/python -c 'import pyscf'"
     run_check "Import PyTorch" "$ENV_PATH/bin/python -c 'import torch'"

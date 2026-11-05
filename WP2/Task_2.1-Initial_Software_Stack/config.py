@@ -42,6 +42,25 @@ LEXIS_PROJECT = os.getenv("LEXIS_PROJECT", "your_vlq_project")
 # LEXIS Accounting Resource / QPU Backend (e.g. VLQ-CZ)
 LEXIS_RESOURCE = os.getenv("LEXIS_RESOURCE", "VLQ-CZ")
 
+# Backend Cluster Name (default: VLQ)
+LEXIS_BACKEND_NAME = os.getenv("LEXIS_BACKEND", os.getenv("LEXIS_BACKEND_NAME", "VLQ"))
+
+
+def get_qprovider_class():
+    """
+    Returns the QProvider class from the modern qheappe_client (qaas >= 1.0.0)
+    with seamless fallback to legacy qaas.client (qaas < 1.0.0).
+    """
+    try:
+        from qheappe_client import QProvider
+        return QProvider
+    except ImportError:
+        try:
+            from qaas.client import QProvider
+            return QProvider
+        except ImportError:
+            return None
+
 
 def get_token_remaining_seconds(token_str: str) -> int:
     """Returns remaining lifetime in seconds from JWT exp claim, or 0 if invalid."""

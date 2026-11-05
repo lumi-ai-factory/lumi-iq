@@ -31,7 +31,10 @@ except Exception:
     pass
 
 from qiskit import QuantumCircuit
-from qaas.client import QProvider
+try:
+    from qheappe_client import QProvider, QBackend, QJob
+except ImportError:
+    from qaas.client import QProvider, QBackend, QJob
 
 # 1. Build a Qiskit circuit (Bell state)
 qc = QuantumCircuit(2, 2)
@@ -107,9 +110,16 @@ if provider._token:
 
 # 3. Initialize the QBackend with the client
 print(f"Retrieving backend for resource: {resource_name}...")
-backend = provider.get_backend(
-    lexis_resource=resource_name,
-)
+backend_name = os.getenv("LEXIS_BACKEND", "VLQ")
+try:
+    backend = provider.get_backend(
+        lexis_resource=resource_name,
+        backend_name=backend_name,
+    )
+except TypeError:
+    backend = provider.get_backend(
+        lexis_resource=resource_name,
+    )
 
 # 4. Transpile circuit for VLQ backend
 print("Transpiling circuit for VLQ Star topology...")
@@ -122,8 +132,15 @@ print(f"Job submitted successfully. Job ID: {job.job_id()}")
 
 # 6. Await job execution and retrieve results
 print("Waiting for job execution on VLQ...")
-result = job.result()
-counts = result.get_counts()
+try:
+    result = job.result(qiskit_legacy=True)
+    counts = result.get_counts()
+except (TypeError, AttributeError):
+    result = job.result()
+    if hasattr(result, "get_counts"):
+        counts = result.get_counts()
+    else:
+        counts = result[0].data.meas.get_counts()
 
 print("\n================ Execution Results ================")
 print("Counts:", counts)

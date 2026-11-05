@@ -49,7 +49,7 @@ bash modules/scripts/deploy_module.sh --project <your_project_id> --build
    - `/project/<your_project_id>/modulefiles/Lumi-IQ-qaas/VLQ.lua`
    - `/project/<your_project_id>/modulefiles/Lumi-IQ-qaas/default` (symlink)
 4. Registers the JupyterLab kernel in `/project/<your_project_id>/software/lumi-iq-env/share/jupyter/kernels/lumi-iq`.
-5. Verifies package imports (`qiskit`, `qaas`, `py4lexis`, `iqm.qiskit_iqm`).
+5. Verifies package imports (`qiskit`, `qheappe_client`, `qaas`, `py4lexis`, `iqm.qiskit_iqm`).
 
 #### Available Environment Recipes:
 The repository provides recipes mapped directly to the software stack tool tables:
@@ -86,7 +86,7 @@ module load Lumi-IQ-qaas/VLQ
 
 # Verify:
 which python
-python -c 'import qaas, py4lexis, iqm.qiskit_iqm; print("LUMI-IQ Active!")'
+python -c 'import qheappe_client, qaas, py4lexis, iqm.qiskit_iqm; print("LUMI-IQ Active!")'
 
 # Configure LEXIS project allocation:
 export LEXIS_PROJECT=your_vlq_project

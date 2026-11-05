@@ -35,7 +35,10 @@ sys.path.insert(0, os.path.abspath(os.path.join(script_dir, "../..")))
 
 try:
     from config import LEXIS_PROJECT, LEXIS_RESOURCE, get_lexis_token, save_lexis_token
-    from qaas.client import QProvider
+    try:
+        from qheappe_client import QProvider
+    except ImportError:
+        from qaas.client import QProvider
 except ImportError:
     QProvider = None
     LEXIS_PROJECT = os.getenv("LEXIS_PROJECT", "your_vlq_project")
@@ -203,7 +206,11 @@ def main():
             if getattr(provider, "_token", None):
                 save_lexis_token(provider._token)
 
-        backend = provider.get_backend(LEXIS_RESOURCE)
+        backend_name = os.getenv("LEXIS_BACKEND", "VLQ")
+        try:
+            backend = provider.get_backend(LEXIS_RESOURCE, backend_name=backend_name)
+        except TypeError:
+            backend = provider.get_backend(LEXIS_RESOURCE)
         print(f"Connected to QPU: {backend.name} (target: {LEXIS_RESOURCE})")
 
         # Evaluate the 1-hour ahead forecast for the latest test window
@@ -231,8 +238,12 @@ def main():
         print(f"Job ID: {job.job_id()} queued on VLQ.")
         print("Awaiting QPU measurement execution...")
 
-        result = job.result(timeout_secs=600)
-        counts = result.get_counts()
+        try:
+            result = job.result(timeout_secs=600, qiskit_legacy=True)
+            counts = result.get_counts()
+        except (TypeError, AttributeError):
+            result = job.result(timeout_secs=600)
+            counts = result.get_counts() if hasattr(result, "get_counts") else result[0].data.meas.get_counts()
         print(f"\n[VLQ SUCCESS] Received measurements from VLQ QPU!")
 
         # Calculate <Z_0> expectation value from qubit 0 counts
