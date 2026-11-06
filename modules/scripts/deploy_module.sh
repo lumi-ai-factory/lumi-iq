@@ -26,6 +26,7 @@ DEPLOY_TARGET="appl"
 PROJECT_ID="${LUMI_PROJECT:-}"
 DO_BUILD=false
 DRY_RUN=false
+MULTI_LUSTRE=false
 RECIPE_FILE="$MODULES_ROOT/recipes/env-initial.yml"
 
 # Parse CLI arguments
@@ -48,6 +49,10 @@ while [[ $# -gt 0 ]]; do
             DO_BUILD=true
             shift
             ;;
+        --multi-lustre|-m)
+            MULTI_LUSTRE=true
+            shift
+            ;;
         --dry-run|-n)
             DRY_RUN=true
             shift
@@ -63,6 +68,7 @@ while [[ $# -gt 0 ]]; do
             echo "  --project <ID>         Deploy to shared project storage (/project/<ID>)"
             echo "  --user                 Deploy to personal home directory ($HOME/lumi-iq-env)"
             echo "  --build                Force rebuild of Tykky container"
+            echo "  --multi-lustre, -m     Explicitly trigger parallel replication across all Lustre partitions (lustrep1..4)"
             echo "  --dry-run, -n          Simulate deployment steps and test permissions without writing changes"
             echo "  --recipe <FILE>        Specify custom environment recipe file"
             exit 0
@@ -193,7 +199,11 @@ fi
 # Step 3: Synchronization (for system-wide deployment)
 if [ "$IS_SYSTEM" = "true" ]; then
     echo -e "${BOLD}[Step 3/3] Synchronizing to production hierarchy /appl/local/lumiiq ...${RESET}"
-    bash "$SCRIPT_DIR/sync_to_appl.sh" --source "$STAGING_ROOT" --target "$PRODUCTION_ROOT"
+    EXTRA_SYNC_OPTS=()
+    if [ "$MULTI_LUSTRE" = "true" ]; then
+        EXTRA_SYNC_OPTS+=("--multi-lustre")
+    fi
+    bash "$SCRIPT_DIR/sync_to_appl.sh" --source "$STAGING_ROOT" --target "$PRODUCTION_ROOT" "${EXTRA_SYNC_OPTS[@]}"
     bash "$SCRIPT_DIR/verify_module.sh" "$PRODUCTION_ROOT"
 else
     echo -e "${BOLD}[Step 3/3] Setting permissions...${RESET}"
