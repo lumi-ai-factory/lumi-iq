@@ -54,8 +54,8 @@ bash deploy_shared_module.sh project_462001789 --build
 
 #### Available Environment Recipes (Deliverable D2.1 Mapping):
 The repository provides recipes mapped directly to the Deliverable D2.1 tool tables:
-- **`env.yml` / `recipes/env-initial.yml`**: Official Section 3.4.1 Baseline (Qiskit, Qiskit-IQM, QaaS, Py4LEXIS, PySCF, PyTorch, QCut / circuit-knitting-toolbox).
-- **`recipes/env-later-additions.yml`**: Section 3.4.2 Roadmap additions (MQT Predictor, PennyLane, PennyLane-IQM, BQSKit, Qiskit Addons).
+- **`env.yml` / `recipes/env-initial.yml`**: Official Section 3.4.1 Baseline (Qiskit 2.1.2, Qiskit-Aer 0.17.2, QaaS 1.0.0, Py4LEXIS, PySCF, PyTorch, QCut / `qiskit-addon-cutting`, Stim, PyMatching, PennyLane).
+- **`recipes/env-later-additions.yml`**: Section 3.4.2 Roadmap additions (MQT Predictor, PennyLane, BQSKit, Qiskit Addon SQD, IQM Addons).
 - **`recipes/env-complete.yml`**: Consolidated master recipe combining Section 3.4.1 and 3.4.2 into one single All-in-One environment.
 
 To build with a specific recipe (e.g. the complete consolidated suite):

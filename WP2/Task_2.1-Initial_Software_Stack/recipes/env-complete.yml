@@ -18,23 +18,29 @@ dependencies:
   - matplotlib
   - pip:
     - --extra-index-url https://opencode.it4i.eu/api/v4/projects/107/packages/pypi/simple
-    - qiskit-aer
+    - qaas==1.0.0
+    - qiskit==2.1.2
+    - qiskit-aer==0.17.2
+    - pytket-qiskit==0.71.0
     - qiskit-algorithms
     - qiskit-machine-learning
     - qiskit-nature
     - pyscf
     - py4lexis
-    - qaas==0.5.3
     - torch
-    - circuit-knitting-toolbox
-    - qiskit-addon-aqc-tensor
-    - iqm-client[qiskit]
-    - iqm-qaoa
-    - iqm-qubit-selector
-    - iqm-error-reduction-tools
-    - fiqci-ems
-    - qc-parallelizer
-    - mqt.predictor
-    - pennylane
-    - pennylane-qiskit
-    - bqskit
+    - qiskit-addon-cutting==0.10.0
+    - qiskit-addon-aqc-tensor==0.3.1
+    - qiskit-addon-sqd==0.14.1
+    - bqskit==1.2.1
+    - mqt.predictor==2.4.0
+    - qc-parallelizer==2.1.1
+    - iqm-client[qiskit]~=36.0
+    - iqm-qubit-selector~=1.2.0
+    - iqm-error-reduction-tools~=0.3.0
+    - iqm-qaoa~=3.0.0
+    - fiqci-ems==2.0.0
+    - stim
+    - pymatching
+    - pennylane==0.45.1
+    - pennylane-qiskit==0.45.1
+    # qiskit-addon-dice-solver: awaiting upstream PyPI release with MPI binary
