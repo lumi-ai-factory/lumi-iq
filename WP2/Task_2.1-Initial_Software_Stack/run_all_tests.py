@@ -107,10 +107,26 @@ def test_software_stack():
         ("networkx", "Graph Optimization", False),
         ("dill", "Object Serialization", False),
         ("sklearn", "Classical ML Baseline", False),
+        ("torch", "PyTorch AI/ML Framework", False),
         ("qiskit_algorithms", "Quantum Algorithms Library", False),
         ("qiskit_machine_learning", "QML Extension", False),
         ("qiskit_nature", "Quantum Chemistry Extension", False),
         ("pyscf", "Electronic Structure Backend", False),
+        ("qiskit_addon_cutting", "QCut Circuit Knitting", False),
+        ("qiskit_addon_aqc_tensor", "AQC-Tensor Compression", False),
+        ("qc_parallelizer", "Parallel Circuit Execution", False),
+        ("stim", "Stabilizer QEC Simulation", False),
+        ("pymatching", "MWPM Syndrome Decoder", False),
+        ("pennylane", "PennyLane Hybrid QML", False),
+        ("pennylane_qiskit", "PennyLane-Qiskit Bridge", False),
+        ("iqm.qiskit_iqm", "IQM Architecture Transpiler", False),
+        ("iqm.qubit_selector", "IQM Qubit Selector", False),
+        ("iqm.error_reduction_tools", "IQM Error Reduction", False),
+        ("fiqci_ems", "FiQCI Error Mitigation", False),
+        ("bqskit", "BQSKit Synthesis & Transpiler", False),
+        ("qiskit_addon_sqd", "Sample-based Quantum Diagonalisation", False),
+        ("mqt.predictor", "MQT Predictor ML Transpilation", False),
+        ("iqm.qaoa", "IQM QAOA Synthesis & Optimization", False),
     ]
 
     installed = {}
@@ -118,16 +134,19 @@ def test_software_stack():
 
     for mod_name, desc, required in packages:
         try:
-            mod = __import__(mod_name)
+            parts = mod_name.split(".")
+            mod = __import__(parts[0])
+            for p in parts[1:]:
+                mod = getattr(mod, p)
             ver = getattr(mod, "__version__", "installed")
             installed[mod_name] = ver
-            print(f"  ✓ {mod_name:<24} : {ver:<12} ({desc})")
+            print(f"  ✓ {mod_name:<26} : {ver:<12} ({desc})")
         except Exception:
             if required:
                 missing_required.append(mod_name)
-                print(f"  ✗ {mod_name:<24} : {RED}MISSING (REQUIRED){RESET} ({desc})")
+                print(f"  ✗ {mod_name:<26} : {RED}MISSING (REQUIRED){RESET} ({desc})")
             else:
-                print(f"  - {mod_name:<24} : {YELLOW}Not Installed (Optional){RESET} ({desc})")
+                print(f"  - {mod_name:<26} : {YELLOW}Not Installed (Optional){RESET} ({desc})")
 
     dur = time.time() - start_time
     if missing_required:
