@@ -177,7 +177,7 @@ LATER_ADDITIONS = [
         "import_path": "mqt.predictor",
         "table_name": "MQT Predictor",
         "objective": "AI-assisted calibration-aware device & transpiler selection",
-        "status": "Ready",
+        "status": "Awaiting Upstream TU Munich Fix (RuntimeJob V2)",
     },
     {
         "name": "iqm-qaoa",

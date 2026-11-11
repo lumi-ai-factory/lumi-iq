@@ -22,6 +22,7 @@ dependencies:
   - pip:
     - --extra-index-url https://opencode.it4i.eu/api/v4/projects/107/packages/pypi/simple
     - qaas==1.0.0
+    - iqm-client[qiskit]==35.0.3
     - qiskit==2.1.2
     - qiskit-aer==0.17.2
     - qiskit-algorithms

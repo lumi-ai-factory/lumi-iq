@@ -23,12 +23,12 @@ dependencies:
     - qiskit-addon-sqd==0.14.1
     - qiskit-addon-cutting==0.10.0
     - qiskit-addon-aqc-tensor==0.3.1
-    - mqt.predictor==2.4.0
-    - iqm-client[qiskit]~=36.0
-    - iqm-qaoa~=3.0.0
-    - iqm-qubit-selector~=1.2.0
-    - iqm-error-reduction-tools~=0.3.0
+    - iqm-client[qiskit]==35.0.3
+    - iqm-qaoa~=2.0.3
+    - iqm-qubit-selector~=1.1.3
+    - iqm-error-reduction-tools~=0.2.4
     - fiqci-ems==2.0.0
     - pennylane==0.45.1
     - pennylane-qiskit==0.45.1
+    # mqt.predictor: awaiting upstream TU Munich fix for qiskit-ibm-runtime V2 (RuntimeJob)
     # qiskit-addon-dice-solver: awaiting upstream PyPI release with MPI binary
