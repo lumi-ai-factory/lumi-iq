@@ -80,7 +80,7 @@ CORE_MODULES = [
     },
     {
         "name": "fiqci-ems",
-        "import_path": "fiqci_ems",
+        "import_path": "fiqci.ems",
         "table_name": "FiQCI-EMS",
         "objective": "Noise tailoring, ZNE, readout mitigation (CSC)",
         "required": False,
@@ -196,6 +196,9 @@ LATER_ADDITIONS = [
 ]
 
 
+import importlib
+import importlib.metadata
+
 def check_module(mod_info):
     name = mod_info["name"]
     path = mod_info["import_path"]
@@ -208,15 +211,18 @@ def check_module(mod_info):
         "error": None,
     }
     try:
-        parts = path.split(".")
-        mod = __import__(parts[0])
-        for p in parts[1:]:
-            mod = getattr(mod, p)
+        mod = importlib.import_module(path)
         res["status"] = "INSTALLED"
-        res["version"] = getattr(mod, "__version__", "installed")
+        ver = getattr(mod, "__version__", None)
+        if not ver:
+            try:
+                ver = importlib.metadata.version(name)
+            except Exception:
+                ver = "installed"
+        res["version"] = ver
     except Exception as e:
         res["status"] = "MISSING"
-        res["error"] = str(e)
+        res["error"] = f"{type(e).__name__}: {e}"
     return res
 
 
@@ -274,10 +280,16 @@ def print_table(title, items, run_smoke=False):
 
     for item in items:
         status_str = f"{GREEN}INSTALLED{RESET}" if item["status"] == "INSTALLED" else f"{YELLOW}MISSING{RESET}"
-        ver_str = item["version"] if item["version"] else (item.get("status_note") or "Not found")
+        if item["status"] == "INSTALLED":
+            ver_str = str(item["version"])
+        else:
+            ver_str = item.get("status_note") or "Not found"
 
         line = f"{item['table_name']:<26} | {item['name']:<24} | {status_str:<21} | {ver_str:<25}"
         print(line)
+
+        if item["status"] != "INSTALLED" and item.get("error"):
+            print(f"   └─ {RED}[ERROR]{RESET} {item['error']}")
 
         if run_smoke and item["status"] == "INSTALLED":
             ok, msg = run_smoke_test(item["name"])
