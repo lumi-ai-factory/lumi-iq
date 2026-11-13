@@ -390,6 +390,12 @@ def main():
         help="Shot count per circuit on QPU / simulator (default: 1024)",
     )
     parser.add_argument(
+        "--project",
+        type=str,
+        default=None,
+        help="Override LEXIS project short name (default: from config, e.g. 'vlq_demo_project')",
+    )
+    parser.add_argument(
         "--report-json",
         type=str,
         default=None,
@@ -402,6 +408,9 @@ def main():
         help="Save test report summary to Markdown file",
     )
     args = parser.parse_args()
+
+    if args.project:
+        os.environ["LEXIS_PROJECT"] = args.project
 
     print_banner(args.backend)
     total_start = time.time()
