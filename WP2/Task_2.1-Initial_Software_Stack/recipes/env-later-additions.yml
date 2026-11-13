@@ -15,7 +15,7 @@ dependencies:
   - pip:
     - --extra-index-url https://opencode.it4i.eu/api/v4/projects/107/packages/pypi/simple
     - py4lexis
-    - qaas==1.0.0
+    - qaas>=1.0.0
     - qiskit==2.1.2
     - qiskit-aer==0.17.2
     - pytket-qiskit==0.71.0

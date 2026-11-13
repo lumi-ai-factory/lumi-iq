@@ -21,7 +21,7 @@ dependencies:
   - matplotlib
   - pip:
     - --extra-index-url https://opencode.it4i.eu/api/v4/projects/107/packages/pypi/simple
-    - qaas==1.0.0
+    - qaas>=1.0.0
     - iqm-client[qiskit]~=36.0
     - iqm-qubit-selector~=1.2.0
     - iqm-error-reduction-tools~=0.3.0
