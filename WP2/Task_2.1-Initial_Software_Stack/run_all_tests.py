@@ -98,7 +98,7 @@ def test_software_stack():
     packages = [
         ("qiskit", "Core Quantum SDK", True),
         ("qiskit_aer", "High-performance Simulator", True),
-        ("qaas", "IT4I QaaS QPU Client", True),
+        ("qheappe_client", "IT4I QaaS / QHEAppE Client", True),
         ("py4lexis", "LEXIS AAI & Orchestration", True),
         ("numpy", "Numerical Computing", True),
         ("scipy", "Scientific Algorithms", True),
@@ -122,7 +122,7 @@ def test_software_stack():
         ("iqm.qiskit_iqm", "IQM Architecture Transpiler", False),
         ("iqm.qubit_selector", "IQM Qubit Selector", False),
         ("iqm.error_reduction_tools", "IQM Error Reduction", False),
-        ("fiqci_ems", "FiQCI Error Mitigation", False),
+        ("fiqci.ems", "FiQCI Error Mitigation", False),
         ("bqskit", "BQSKit Synthesis & Transpiler", False),
         ("qiskit_addon_sqd", "Sample-based Quantum Diagonalisation", False),
         ("mqt.predictor", "MQT Predictor ML Transpilation", False),
@@ -134,11 +134,13 @@ def test_software_stack():
 
     for mod_name, desc, required in packages:
         try:
-            parts = mod_name.split(".")
-            mod = __import__(parts[0])
-            for p in parts[1:]:
-                mod = getattr(mod, p)
-            ver = getattr(mod, "__version__", "installed")
+            mod = importlib.import_module(mod_name)
+            ver = getattr(mod, "__version__", None)
+            if not ver:
+                try:
+                    ver = importlib.metadata.version(mod_name.split(".")[0])
+                except Exception:
+                    ver = "installed"
             installed[mod_name] = ver
             print(f"  ✓ {mod_name:<26} : {ver:<12} ({desc})")
         except Exception:

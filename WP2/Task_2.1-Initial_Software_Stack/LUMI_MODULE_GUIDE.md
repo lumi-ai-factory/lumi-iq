@@ -50,7 +50,7 @@ bash deploy_shared_module.sh project_462001789 --build
    - `/project/project_462001789/modulefiles/lumi-iq/default` (symlink)
    - `/project/project_462001789/modulefiles/LUMI-IQ-qaas/VLQ.lua` (alias)
 4. Registers the JupyterLab kernel in `/project/project_462001789/software/lumi-iq-env/share/jupyter/kernels/lumi-iq`.
-5. Verifies package imports (`qiskit`, `qaas`, `py4lexis`, `iqm.qiskit_iqm`).
+5. Verifies package imports (`qiskit`, `qheappe_client`, `py4lexis`, `iqm.qiskit_iqm`).
 
 #### Available Environment Recipes (Deliverable D2.1 Mapping):
 The repository provides recipes mapped directly to the Deliverable D2.1 tool tables:
@@ -87,7 +87,7 @@ module load lumi-iq
 
 # Verify:
 which python
-python -c 'import qaas, py4lexis, iqm.qiskit_iqm; print("LUMI-IQ Active!")'
+python -c 'import qheappe_client, py4lexis, iqm.qiskit_iqm; print("LUMI-IQ Active!")'
 ```
 
 To make this persistent for every login session:

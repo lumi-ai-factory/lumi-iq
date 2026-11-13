@@ -45,7 +45,7 @@ CORE_MODULES = [
     },
     {
         "name": "qaas",
-        "import_path": "qaas",
+        "import_path": "qheappe_client",
         "table_name": "QaaS Client",
         "objective": "Remote gateway access to Czech National QC (VLQ)",
         "required": True,
@@ -239,9 +239,11 @@ def run_smoke_test(mod_name):
             from qiskit_aer import AerSimulator
             sim = AerSimulator()
             return True, f"Instantiated {sim.name}"
-        elif mod_name == "qaas":
-            import qaas
-            return True, f"QaaS {getattr(qaas, '__version__', '1.0.0')} initialized"
+        elif mod_name in ("qaas", "qheappe_client"):
+            import qheappe_client
+            from qheappe_client.qprovider import QProvider
+            ver = getattr(qheappe_client, "__version__", "1.0.0")
+            return True, f"qheappe_client {ver} ready (QProvider available)"
         elif mod_name == "stim":
             import stim
             c = stim.Circuit("H 0\nCNOT 0 1\nM 0 1")

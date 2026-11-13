@@ -73,7 +73,7 @@ Everything runs directly via standard Lmod environment modules:
 2. **Verify active Python environment**:
    ```bash
    which python
-   python -c "import qaas, qiskit; print('LUMI-IQ environment ready!')"
+   python -c "import qheappe_client, qiskit; print('LUMI-IQ environment ready!')"
    ```
 
 3. **Run your scripts or submit jobs**:
@@ -268,7 +268,7 @@ bash run_all_tests.sh --backend SIM --slurm
 
 The test suite automatically:
 1. Loads the `lumi-iq` Lmod module if running in a fresh shell.
-2. Checks all core Python packages (`qiskit`, `qiskit_aer`, `qaas`, `py4lexis`, `scipy`, `sklearn`, `pandas`, `networkx`, `matplotlib`, `dill`, `pyscf`).
+2. Checks all core Python packages (`qiskit`, `qiskit_aer`, `qheappe_client`, `py4lexis`, `scipy`, `sklearn`, `pandas`, `networkx`, `matplotlib`, `dill`, `pyscf`).
 3. Verifies active LEXIS credentials (`~/.lumi-iq/token`) and QPU target (`VLQ-CZ`).
 4. Executes the core 2-qubit Bell state entanglement benchmark.
 5. Executes all 4 standardized WP2 use cases sequentially with timing and validation.

@@ -106,7 +106,7 @@ chgrp -R "$PROJECT_ID" "$SHARED_MODULE_ROOT" 2>/dev/null || true
 # 5. Verification Test
 echo "Verifying shared module deployment..."
 if [ -x "$SHARED_SW_DIR/bin/python" ]; then
-    "$SHARED_SW_DIR/bin/python" -c "import qiskit, qaas, py4lexis; print('[VERIFIED] LUMI-IQ stack functional in shared location!')"
+    "$SHARED_SW_DIR/bin/python" -c "import qiskit, qheappe_client, py4lexis; print('[VERIFIED] LUMI-IQ stack functional in shared location!')"
 else
     echo "Notice: Wrapper script $SHARED_SW_DIR/bin/python not directly executable outside LUMI compute/login nodes."
 fi
