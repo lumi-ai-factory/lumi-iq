@@ -282,7 +282,10 @@ def test_core_bell_state(backend_target, shots=1024):
             print(f"  Submitting to VLQ ({shots} shots)...")
             job = backend.run(t_qc, shots=shots, job_name="test_bell_state")
             print(f"  Job {job.job_id()} queued. Waiting for completion...")
-            result = job.result(timeout_secs=600)
+            try:
+                result = job.result()
+            except TypeError:
+                result = job.result(timeout=600)
             counts = result.get_counts()
             dur = time.time() - start_time
             print(f"  ✓ VLQ QPU measurements: {counts}")

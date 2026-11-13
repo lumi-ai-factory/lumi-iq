@@ -18,6 +18,7 @@ os.environ.setdefault("MPLCONFIGDIR", os.path.join(tempfile.gettempdir(), "matpl
 
 import warnings
 warnings.filterwarnings("ignore", message=".*IProgress not found.*")
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 import numpy as np
 import matplotlib
@@ -167,7 +168,10 @@ def main():
         print(f"Submitted to Slurm queue on VLQ. Job ID: {job.job_id()}")
         print(f"Awaiting QPU execution results (timeout: 600s)...")
 
-        result = job.result(timeout_secs=600)
+        try:
+            result = job.result()
+        except TypeError:
+            result = job.result(timeout=600)
         counts = result.get_counts()
         if isinstance(counts, dict):
             counts = [counts]

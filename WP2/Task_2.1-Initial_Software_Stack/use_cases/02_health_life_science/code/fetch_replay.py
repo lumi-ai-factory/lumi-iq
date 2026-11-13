@@ -27,7 +27,10 @@ def fetch_counts(
     job = backend.retrieve_job(job_id)
     print(f'Retrieved job {job_id} from backend {backend.name}, status: {job.status()}')
 
-    counts_list = job.result(timeout_secs=timeout_secs).get_counts()
+    try:
+        counts_list = job.result().get_counts()
+    except TypeError:
+        counts_list = job.result(timeout=timeout_secs).get_counts()
     # get_counts returns a bare dict instead of a list when only one circuit was run
     if isinstance(counts_list, dict):
         counts_list = [counts_list]

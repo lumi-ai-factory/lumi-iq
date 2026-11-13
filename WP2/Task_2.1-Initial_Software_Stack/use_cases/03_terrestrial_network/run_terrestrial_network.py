@@ -195,7 +195,10 @@ def main():
         print(f"Job ID: {job.job_id()} queued on VLQ.")
         print("Awaiting QPU measurement execution...")
 
-        result = job.result(timeout_secs=600)
+        try:
+            result = job.result()
+        except TypeError:
+            result = job.result(timeout=600)
         counts = result.get_counts()
         print(f"\n[VLQ SUCCESS] Received measurements from VLQ QPU!")
 
