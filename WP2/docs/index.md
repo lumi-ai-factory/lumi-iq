@@ -29,6 +29,18 @@ module load Lumi-IQ
 
 *(Note: When targeting the local simulator for testing without QPU credentials, you can load the simulation profile `module load Lumi-IQ-qaas/SIM`).*
 
+### Module Hierarchy
+
+To accommodate diverse hybrid scientific workflows, the stack is organized into specialized domain modules:
+
+| Module | Description | 
+|---|---|
+| **`Lumi-IQ-qaas/VLQ`** | **Primary Hardware Target**: Direct submission to the physical 24-qubit VLQ QPU. |
+| **`Lumi-IQ-qaas/SIM`** | **HPC Simulator Target**: High-performance classical circuit simulation on LUMI CPU nodes. |
+| **`Lumi-IQ-core`** | Baseline quantum circuit transpilation and hybrid orchestration. |
+| **`Lumi-IQ-qml`** | Quantum Machine Learning and Hybrid AI computations. |
+| **`Lumi-IQ-ems`** | Quantum Error Mitigation & Noise Tailoring (FiQCI-EMS, IQM Error Reduction Tools). |
+
 ---
 
 ## Running your first job
