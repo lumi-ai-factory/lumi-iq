@@ -7,6 +7,19 @@ from hamiltonian import run_hf, select_active_space, active_space_hamiltonian, q
 from main import get_backend
 from vqe import pauli_measurement_layout, energies_from_counts, load_trajectory
 
+try:
+    from config import safe_get_job_result, safe_get_counts
+except Exception:
+    import sys, os
+    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
+    try:
+        from config import safe_get_job_result, safe_get_counts
+    except Exception:
+        def safe_get_job_result(j, **kw):
+            return j.result()
+        def safe_get_counts(r):
+            return r.get_counts() if hasattr(r, "get_counts") else {}
+
 # --- Functions ---
 def fetch_counts(
         backend,
@@ -27,10 +40,8 @@ def fetch_counts(
     job = backend.retrieve_job(job_id)
     print(f'Retrieved job {job_id} from backend {backend.name}, status: {job.status()}')
 
-    try:
-        counts_list = job.result().get_counts()
-    except TypeError:
-        counts_list = job.result(timeout=timeout_secs).get_counts()
+    res = safe_get_job_result(job, timeout=timeout_secs)
+    counts_list = safe_get_counts(res)
     # get_counts returns a bare dict instead of a list when only one circuit was run
     if isinstance(counts_list, dict):
         counts_list = [counts_list]

@@ -10,6 +10,40 @@ from qiskit.quantum_info import SparsePauliOp
 from qiskit.providers import Backend
 from classical_shadow import calculate_expectation_value
 
+def safe_get_job_result(j, timeout=600):
+    for kwargs in [{"qiskit_legacy": True}, {"timeout": timeout}, {}]:
+        try:
+            return j.result(**kwargs)
+        except TypeError:
+            continue
+    return j.result()
+
+def safe_get_counts(result):
+    if hasattr(result, "get_counts"):
+        try:
+            return result.get_counts()
+        except Exception:
+            pass
+    pub_list = list(result) if hasattr(result, "__iter__") else [result]
+    all_counts = []
+    for pub in pub_list:
+        data = getattr(pub, "data", pub)
+        counts = None
+        for attr in ["meas", "c", "m", "cr", "meas_all"]:
+            if hasattr(data, attr) and hasattr(getattr(data, attr), "get_counts"):
+                counts = getattr(data, attr).get_counts()
+                break
+        if counts is None and hasattr(data, "keys"):
+            for k in data.keys():
+                reg = getattr(data, k, None)
+                if hasattr(reg, "get_counts"):
+                    counts = reg.get_counts()
+                    break
+        all_counts.append(counts if counts is not None else {})
+    if len(all_counts) == 1:
+        return all_counts[0]
+    return all_counts
+
 # --- Functions ---
 def wait_for_user(
         message: str = 'Press Enter to continue...'
@@ -248,7 +282,10 @@ def evaluate_energy(
                 break
 
     # Decode the counts of each parameter set separately
-    counts_list = job.result().get_counts()
+    res = safe_get_job_result(job)
+    counts_list = safe_get_counts(res)
+    if isinstance(counts_list, dict):
+        counts_list = [counts_list]
     energies = energies_from_counts(
         counts_list, [terms for _, terms in groups], const, shots
     )

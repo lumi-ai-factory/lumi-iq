@@ -7,6 +7,40 @@ from hamiltonian import run_hf, select_active_space, active_space_hamiltonian, q
 from main import get_backend
 from vqe import pauli_measurement_layout, energies_from_counts, load_trajectory
 
+def safe_get_job_result(j, timeout=600):
+    for kwargs in [{"qiskit_legacy": True}, {"timeout": timeout}, {}]:
+        try:
+            return j.result(**kwargs)
+        except TypeError:
+            continue
+    return j.result()
+
+def safe_get_counts(result):
+    if hasattr(result, "get_counts"):
+        try:
+            return result.get_counts()
+        except Exception:
+            pass
+    pub_list = list(result) if hasattr(result, "__iter__") else [result]
+    all_counts = []
+    for pub in pub_list:
+        data = getattr(pub, "data", pub)
+        counts = None
+        for attr in ["meas", "c", "m", "cr", "meas_all"]:
+            if hasattr(data, attr) and hasattr(getattr(data, attr), "get_counts"):
+                counts = getattr(data, attr).get_counts()
+                break
+        if counts is None and hasattr(data, "keys"):
+            for k in data.keys():
+                reg = getattr(data, k, None)
+                if hasattr(reg, "get_counts"):
+                    counts = reg.get_counts()
+                    break
+        all_counts.append(counts if counts is not None else {})
+    if len(all_counts) == 1:
+        return all_counts[0]
+    return all_counts
+
 # --- Functions ---
 def fetch_counts(
         backend,
@@ -27,10 +61,8 @@ def fetch_counts(
     job = backend.retrieve_job(job_id)
     print(f'Retrieved job {job_id} from backend {backend.name}, status: {job.status()}')
 
-    try:
-        counts_list = job.result().get_counts()
-    except TypeError:
-        counts_list = job.result(timeout=timeout_secs).get_counts()
+    res = safe_get_job_result(job, timeout=timeout_secs)
+    counts_list = safe_get_counts(res)
     # get_counts returns a bare dict instead of a list when only one circuit was run
     if isinstance(counts_list, dict):
         counts_list = [counts_list]

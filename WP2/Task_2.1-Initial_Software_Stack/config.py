@@ -97,3 +97,51 @@ def save_lexis_token(token_str: str, token_path: str = "~/.lumi-iq/token") -> No
     print(f"Token saved securely to {path} (permissions: 0600).")
 
 
+def safe_get_counts(result):
+    """
+    Universally extracts measurement counts from either:
+    1. Legacy Qiskit Result (result.get_counts())
+    2. Modern Qiskit / QaaS Primitives V2 PrimitiveResult (result[i].data.<meas>.get_counts())
+    """
+    if hasattr(result, "get_counts"):
+        try:
+            return result.get_counts()
+        except Exception:
+            pass
+
+    pub_list = list(result) if hasattr(result, "__iter__") else [result]
+    all_counts = []
+    for pub in pub_list:
+        data = getattr(pub, "data", pub)
+        counts = None
+        for attr in ["meas", "c", "m", "cr", "meas_all"]:
+            if hasattr(data, attr) and hasattr(getattr(data, attr), "get_counts"):
+                counts = getattr(data, attr).get_counts()
+                break
+        if counts is None and hasattr(data, "keys"):
+            for k in data.keys():
+                reg = getattr(data, k, None)
+                if hasattr(reg, "get_counts"):
+                    counts = reg.get_counts()
+                    break
+        all_counts.append(counts if counts is not None else {})
+
+    if len(all_counts) == 1:
+        return all_counts[0]
+    return all_counts
+
+
+def safe_get_job_result(job, timeout=600):
+    """
+    Safely retrieves the result from a Qiskit or QaaS job object, trying qiskit_legacy=True first,
+    then timeout=timeout, then bare result().
+    """
+    for kwargs in [{"qiskit_legacy": True}, {"timeout": timeout}, {}]:
+        try:
+            return job.result(**kwargs)
+        except TypeError:
+            continue
+    return job.result()
+
+
+

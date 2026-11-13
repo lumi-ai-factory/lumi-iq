@@ -10,6 +10,19 @@ from qiskit.quantum_info import SparsePauliOp
 from qiskit.providers import Backend
 from classical_shadow import calculate_expectation_value
 
+try:
+    from config import safe_get_job_result, safe_get_counts
+except Exception:
+    import sys, os
+    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
+    try:
+        from config import safe_get_job_result, safe_get_counts
+    except Exception:
+        def safe_get_job_result(j, **kw):
+            return j.result()
+        def safe_get_counts(r):
+            return r.get_counts() if hasattr(r, "get_counts") else {}
+
 # --- Functions ---
 def wait_for_user(
         message: str = 'Press Enter to continue...'
@@ -248,7 +261,10 @@ def evaluate_energy(
                 break
 
     # Decode the counts of each parameter set separately
-    counts_list = job.result().get_counts()
+    res = safe_get_job_result(job)
+    counts_list = safe_get_counts(res)
+    if isinstance(counts_list, dict):
+        counts_list = [counts_list]
     energies = energies_from_counts(
         counts_list, [terms for _, terms in groups], const, shots
     )

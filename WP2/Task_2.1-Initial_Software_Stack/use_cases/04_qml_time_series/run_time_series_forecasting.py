@@ -34,7 +34,8 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.abspath(os.path.join(script_dir, "../..")))
 
 try:
-    from config import LEXIS_PROJECT, LEXIS_RESOURCE, get_lexis_token, save_lexis_token
+    from config import (LEXIS_PROJECT, LEXIS_RESOURCE, get_lexis_token, save_lexis_token,
+                        safe_get_job_result, safe_get_counts)
     try:
         from qheappe_client import QProvider
     except ImportError:
@@ -45,6 +46,10 @@ except ImportError:
     LEXIS_RESOURCE = "VLQ-CZ"
     get_lexis_token = lambda: None
     save_lexis_token = lambda t: None
+    def safe_get_job_result(j, **kw):
+        return j.result()
+    def safe_get_counts(r):
+        return r.get_counts() if hasattr(r, "get_counts") else {}
 
 
 class QNNModelWrapper:
@@ -234,11 +239,8 @@ def main():
         print(f"Job ID: {job.job_id()} queued on VLQ.")
         print("Awaiting QPU measurement execution...")
 
-        try:
-            result = job.result()
-        except TypeError:
-            result = job.result(timeout=600)
-        counts = result.get_counts()
+        result = safe_get_job_result(job, timeout=600)
+        counts = safe_get_counts(result)
         print(f"\n[VLQ SUCCESS] Received measurements from VLQ QPU!")
 
         # Calculate <Z_0> expectation value from qubit 0 counts

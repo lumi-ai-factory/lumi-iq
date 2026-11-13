@@ -83,12 +83,16 @@ if not token and os.getenv("SLURM_JOB_ID"):
     sys.exit(1)
 
 try:
-    from config import LEXIS_PROJECT, LEXIS_RESOURCE
+    from config import LEXIS_PROJECT, LEXIS_RESOURCE, safe_get_job_result, safe_get_counts
     lexis_project = LEXIS_PROJECT
     resource_name = LEXIS_RESOURCE
 except Exception:
     lexis_project = os.getenv("LEXIS_PROJECT", "vlq_demo_project")
     resource_name = os.getenv("LEXIS_RESOURCE", "VLQ-CZ")
+    def safe_get_job_result(j, **kw):
+        return j.result()
+    def safe_get_counts(r):
+        return r.get_counts() if hasattr(r, "get_counts") else {}
 
 print(f"Connecting to LEXIS project: {lexis_project}...")
 provider = QProvider(
@@ -125,8 +129,8 @@ print(f"Job submitted successfully. Job ID: {job.job_id()}")
 
 # 6. Await job execution and retrieve results
 print("Waiting for job execution on VLQ...")
-result = job.result()
-counts = result.get_counts()
+result = safe_get_job_result(job)
+counts = safe_get_counts(result)
 
 print("\n================ Execution Results ================")
 print("Counts:", counts)

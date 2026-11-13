@@ -269,7 +269,7 @@ def test_core_bell_state(backend_target, shots=1024):
 
     elif backend_target == "VLQ":
         try:
-            from config import LEXIS_PROJECT, LEXIS_RESOURCE, get_lexis_token
+            from config import LEXIS_PROJECT, LEXIS_RESOURCE, get_lexis_token, safe_get_job_result, safe_get_counts
             try:
                 from qheappe_client import QProvider
             except ImportError:
@@ -282,11 +282,8 @@ def test_core_bell_state(backend_target, shots=1024):
             print(f"  Submitting to VLQ ({shots} shots)...")
             job = backend.run(t_qc, shots=shots, job_name="test_bell_state")
             print(f"  Job {job.job_id()} queued. Waiting for completion...")
-            try:
-                result = job.result()
-            except TypeError:
-                result = job.result(timeout=600)
-            counts = result.get_counts()
+            result = safe_get_job_result(job, timeout=600)
+            counts = safe_get_counts(result)
             dur = time.time() - start_time
             print(f"  ✓ VLQ QPU measurements: {counts}")
             return TestResult(3, "Core Bell State Benchmark", "VLQ", "PASS", dur, f"QPU Counts: {counts}")

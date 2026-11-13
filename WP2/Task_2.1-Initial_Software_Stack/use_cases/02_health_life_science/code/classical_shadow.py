@@ -11,6 +11,19 @@ from qiskit.quantum_info import Statevector
 from qiskit.circuit import Instruction
 from qiskit.providers import Backend
 
+try:
+    from config import safe_get_job_result, safe_get_counts
+except Exception:
+    import sys, os
+    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
+    try:
+        from config import safe_get_job_result, safe_get_counts
+    except Exception:
+        def safe_get_job_result(j, **kw):
+            return j.result()
+        def safe_get_counts(r):
+            return r.get_counts() if hasattr(r, "get_counts") else {}
+
 
 def is_job_done(job) -> bool:
     """Helper to check if a quantum job reached terminal state across Qiskit and QaaS backends."""
@@ -162,7 +175,8 @@ def calculate_snapshots(
                     print(f'Warning: Job {job.job_id()} exceeded timeout (30m). Calling result().')
                     break
             
-        results = job.result().get_counts()
+        res = safe_get_job_result(job)
+        results = safe_get_counts(res)
         # get_counts returns a bare dict instead of a list when only one circuit was run,
         # which happens whenever the last batch holds a single circuit
         if isinstance(results, dict):
