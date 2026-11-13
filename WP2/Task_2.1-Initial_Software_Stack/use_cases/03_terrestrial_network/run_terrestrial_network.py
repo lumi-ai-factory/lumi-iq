@@ -39,7 +39,10 @@ sys.path.insert(0, os.path.abspath(os.path.join(script_dir, "../..")))
 
 try:
     from config import LEXIS_PROJECT, LEXIS_RESOURCE, get_lexis_token, save_lexis_token
-    from qaas.client import QProvider
+    try:
+        from qheappe_client import QProvider
+    except ImportError:
+        from qaas.client import QProvider
 except ImportError:
     QProvider = None
     LEXIS_PROJECT = "vlq_demo_project"

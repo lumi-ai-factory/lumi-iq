@@ -5,7 +5,10 @@ import warnings
 warnings.filterwarnings("ignore", message=".*IProgress not found.*")
 
 try:
-    from qaas.client import QProvider, QBackend, QJob
+    try:
+        from qheappe_client import QProvider, QBackend, QJob
+    except ImportError:
+        from qaas.client import QProvider, QBackend, QJob
     if QJob is not None:
         if not hasattr(QJob, "is_final_state"):
             def _qjob_is_final_state(self):

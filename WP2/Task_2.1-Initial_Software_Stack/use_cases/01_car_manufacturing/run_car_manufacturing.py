@@ -44,7 +44,10 @@ sys.path.insert(0, os.path.abspath(os.path.join(script_dir, "../..")))
 
 try:
     from config import LEXIS_PROJECT, LEXIS_RESOURCE, get_lexis_token, save_lexis_token
-    from qaas.client import QProvider
+    try:
+        from qheappe_client import QProvider
+    except ImportError:
+        from qaas.client import QProvider
 except ImportError:
     QProvider = None
     LEXIS_PROJECT = "vlq_demo_project"
@@ -187,16 +190,19 @@ def main():
         print("-" * 55)
 
     # In parallel, compute reference metrics via statevector for complete visualization
+    print(f"\nComputing Quantum Kernel matrices on CPU ({len(X_test_scaled)} test x {len(X_ref_scaled)} ref fidelity evaluations)...", flush=True)
     quantum_kernel = FidelityStatevectorKernel(feature_map=feature_map)
     K_test_ref = quantum_kernel.evaluate(x_vec=X_test_scaled, y_vec=X_ref_scaled)
     quantum_anomaly_score = K_test_ref.mean(axis=1)
 
+    print("Computing reference self-similarity matrix for threshold determination...", flush=True)
     K_ref_ref = quantum_kernel.evaluate(x_vec=X_ref_scaled)
     ref_self_scores = K_ref_ref.mean(axis=1)
     quantum_threshold = np.percentile(ref_self_scores, 5)
     quantum_pred = (quantum_anomaly_score < quantum_threshold).astype(int)
 
     # 4. Classical Baselines
+    print("Fitting classical baseline models (IsolationForest, One-Class SVM)...", flush=True)
     iso_forest = IsolationForest(contamination=n_defect / (n_normal + n_defect), random_state=SEED)
     iso_forest.fit(X_ref_scaled)
     iso_pred = (iso_forest.predict(X_test_scaled) == -1).astype(int)

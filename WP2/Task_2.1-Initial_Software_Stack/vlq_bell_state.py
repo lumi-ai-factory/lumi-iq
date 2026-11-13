@@ -31,7 +31,10 @@ except Exception:
     pass
 
 from qiskit import QuantumCircuit
-from qaas.client import QProvider
+try:
+    from qheappe_client import QProvider
+except ImportError:
+    from qaas.client import QProvider
 
 # 1. Build a Qiskit circuit (Bell state)
 qc = QuantumCircuit(2, 2)

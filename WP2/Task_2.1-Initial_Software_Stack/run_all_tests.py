@@ -30,6 +30,8 @@ import argparse
 import subprocess
 import tempfile
 import warnings
+import importlib
+import importlib.metadata
 from datetime import datetime
 
 os.environ.setdefault("MPLCONFIGDIR", os.path.join(tempfile.gettempdir(), "matplotlib"))
@@ -136,11 +138,20 @@ def test_software_stack():
         try:
             mod = importlib.import_module(mod_name)
             ver = getattr(mod, "__version__", None)
-            if not ver:
+            if not ver or ver == "unknown":
                 try:
                     ver = importlib.metadata.version(mod_name.split(".")[0])
                 except Exception:
-                    ver = "installed"
+                    ver = None
+            if not ver:
+                for candidate in [mod_name.replace(".", "-"), mod_name.replace("_", "-"), "iqm-client", "fiqci-ems", "qaas"]:
+                    try:
+                        ver = importlib.metadata.version(candidate)
+                        break
+                    except Exception:
+                        continue
+            if not ver:
+                ver = "installed"
             installed[mod_name] = ver
             print(f"  ✓ {mod_name:<26} : {ver:<12} ({desc})")
         except Exception:
@@ -201,7 +212,10 @@ def test_lexis_authentication(backend_target):
     if token_valid:
         # Check backend connectivity if QProvider available
         try:
-            from qaas.client import QProvider
+            try:
+                from qheappe_client import QProvider
+            except ImportError:
+                from qaas.client import QProvider
             provider = QProvider(lexis_project=LEXIS_PROJECT, token=token)
             backend = provider.get_backend(LEXIS_RESOURCE)
             print(f"  ✓ Connected to Hardware Target: {backend.name} (Resource: {LEXIS_RESOURCE})")
@@ -256,7 +270,10 @@ def test_core_bell_state(backend_target, shots=1024):
     elif backend_target == "VLQ":
         try:
             from config import LEXIS_PROJECT, LEXIS_RESOURCE, get_lexis_token
-            from qaas.client import QProvider
+            try:
+                from qheappe_client import QProvider
+            except ImportError:
+                from qaas.client import QProvider
             token = get_lexis_token()
             provider = QProvider(lexis_project=LEXIS_PROJECT, token=token)
             backend = provider.get_backend(LEXIS_RESOURCE)
@@ -289,7 +306,7 @@ def run_use_case_subprocess(uc_num, name, script_relpath, backend_target, extra_
         print(f"  ✗ Script not found at {script_path}")
         return TestResult(uc_num + 3, f"UC {uc_num}: {name}", backend_target, "FAIL", dur, "Script missing")
 
-    cmd = [sys.executable, script_path, "--backend", backend_target]
+    cmd = [sys.executable, "-u", script_path, "--backend", backend_target]
     if extra_args:
         cmd.extend(extra_args)
 

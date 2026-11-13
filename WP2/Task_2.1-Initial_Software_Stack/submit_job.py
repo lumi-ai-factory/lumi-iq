@@ -78,7 +78,10 @@ def obtain_or_load_token(min_required_sec: int) -> tuple[str, int, int]:
 
     # 2. Interactive OAuth 2.0 Device Code Flow (fresh re-auth)
     print("\n=== Initiating LEXIS Authentication (OAuth Device Code Flow) ===")
-    from qaas.client import QProvider
+    try:
+        from qheappe_client import QProvider
+    except ImportError:
+        from qaas.client import QProvider
 
     provider = QProvider(lexis_project=PROJECT)
     token = provider._token

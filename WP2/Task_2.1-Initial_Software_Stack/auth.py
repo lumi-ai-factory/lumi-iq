@@ -31,7 +31,10 @@ def main():
 
     print(f"\n=== LEXIS Authentication (OAuth 2.0 Device Code Flow) ===")
     print(f"LEXIS Project: {args.project}")
-    from qaas.client import QProvider
+    try:
+        from qheappe_client import QProvider
+    except ImportError:
+        from qaas.client import QProvider
 
     provider = QProvider(lexis_project=args.project)
     token = provider._token
