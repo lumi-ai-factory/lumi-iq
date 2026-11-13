@@ -134,23 +134,42 @@ def test_software_stack():
     installed = {}
     missing_required = []
 
+    pkg_dist_map = {
+        "qheappe_client": ["qaas", "qheappe-client"],
+        "iqm.qiskit_iqm": ["iqm-client", "qiskit-iqm"],
+        "iqm.qubit_selector": ["iqm-qubit-selector"],
+        "iqm.error_reduction_tools": ["iqm-error-reduction-tools"],
+        "fiqci.ems": ["fiqci-ems"],
+        "iqm.qaoa": ["iqm-qaoa"],
+        "sklearn": ["scikit-learn"],
+        "torch": ["torch"],
+        "qiskit_aer": ["qiskit-aer"],
+        "qiskit_addon_cutting": ["qiskit-addon-cutting"],
+        "qiskit_addon_aqc_tensor": ["qiskit-addon-aqc-tensor"],
+        "qc_parallelizer": ["qc-parallelizer"],
+        "qiskit_addon_sqd": ["qiskit-addon-sqd"],
+        "mqt.predictor": ["mqt.predictor", "mqt-predictor"],
+    }
+
     for mod_name, desc, required in packages:
         try:
             mod = importlib.import_module(mod_name)
             ver = getattr(mod, "__version__", None)
             if not ver or ver == "unknown":
-                try:
-                    ver = importlib.metadata.version(mod_name.split(".")[0])
-                except Exception:
-                    ver = None
-            if not ver:
-                for candidate in [mod_name.replace(".", "-"), mod_name.replace("_", "-"), "iqm-client", "fiqci-ems", "qaas"]:
+                candidates = pkg_dist_map.get(mod_name, []) + [
+                    mod_name.split(".")[0],
+                    mod_name.replace(".", "-"),
+                    mod_name.replace("_", "-"),
+                ]
+                for candidate in candidates:
                     try:
-                        ver = importlib.metadata.version(candidate)
-                        break
+                        c_ver = importlib.metadata.version(candidate)
+                        if c_ver and c_ver != "unknown":
+                            ver = c_ver
+                            break
                     except Exception:
                         continue
-            if not ver:
+            if not ver or ver == "unknown":
                 ver = "installed"
             installed[mod_name] = ver
             print(f"  ✓ {mod_name:<26} : {ver:<12} ({desc})")
