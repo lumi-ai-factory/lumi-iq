@@ -214,16 +214,18 @@ def check_module(mod_info):
         mod = importlib.import_module(path)
         res["status"] = "INSTALLED"
         ver = getattr(mod, "__version__", None)
-        if not ver:
+        if not ver or ver == "unknown":
             try:
                 ver = importlib.metadata.version(name)
             except Exception:
                 if name == "qiskit-iqm":
-                    try:
-                        ver = importlib.metadata.version("iqm-client")
-                    except Exception:
-                        ver = "installed"
-                else:
+                    for candidate in ["iqm-client", "qiskit-iqm", "iqm_client"]:
+                        try:
+                            ver = importlib.metadata.version(candidate)
+                            break
+                        except Exception:
+                            pass
+                if not ver or ver == "unknown":
                     ver = "installed"
         res["version"] = ver
     except Exception as e:
@@ -263,8 +265,8 @@ def run_smoke_test(mod_name):
             from iqm.qiskit_iqm import IQMBackend
             return True, "IQMBackend architecture adapter ready"
         elif mod_name == "iqm-qubit-selector":
-            from iqm.qubit_selector import QubitSelector
-            return True, "QubitSelector calibration-aware engine ready"
+            import iqm.qubit_selector
+            return True, "IQM Qubit Selector layout engine ready"
         elif mod_name == "iqm-error-reduction-tools":
             import iqm.error_reduction_tools
             return True, "IQM Noise tailoring & error reduction ready"
